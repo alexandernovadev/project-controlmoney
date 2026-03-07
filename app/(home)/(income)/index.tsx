@@ -258,15 +258,21 @@ export default function IncomeScreen() {
           <View style={headerStyles.wrap}>
             <Text style={headerStyles.filterLabel}>{filterLabel}</Text>
             <View style={headerStyles.row}>
-              <View style={[headerStyles.card, headerStyles.cardHalf, { backgroundColor: Colors.successMuted }]}>
-                <Text style={headerStyles.label}>Cash</Text>
+              <View style={[headerStyles.card, headerStyles.cardHalf, { backgroundColor: Colors.successMuted, borderColor: 'rgba(52, 199, 89, 0.3)' }]}>
+                <View style={headerStyles.cardHeader}>
+                  <MaterialIcons name="payments" size={16} color={Colors.success} />
+                  <Text style={[headerStyles.label, { color: Colors.success }]}>Cash</Text>
+                </View>
                 <Text style={[headerStyles.total, { color: Colors.success }]}>
                   ${formatAmountNumber(totalCash)}
                 </Text>
               </View>
-              <View style={[headerStyles.card, headerStyles.cardHalf, { backgroundColor: Colors.successMuted }]}>
-                <Text style={headerStyles.label}>Digital</Text>
-                <Text style={[headerStyles.total, { color: Colors.success }]}>
+              <View style={[headerStyles.card, headerStyles.cardHalf, { backgroundColor: 'rgba(10, 132, 255, 0.15)', borderColor: 'rgba(10, 132, 255, 0.3)' }]}>
+                <View style={headerStyles.cardHeader}>
+                  <MaterialIcons name="account-balance-wallet" size={16} color={Colors.accent} />
+                  <Text style={[headerStyles.label, { color: Colors.accent }]}>Digital</Text>
+                </View>
+                <Text style={[headerStyles.total, { color: Colors.accent }]}>
                   ${formatAmountNumber(totalDigital)}
                 </Text>
               </View>
@@ -338,23 +344,26 @@ const headerStyles = {
   },
   card: {
     borderRadius: 16,
-    padding: Spacing.lg,
+    padding: Spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(52, 199, 89, 0.3)',
   },
   cardHalf: {
     flex: 1,
   },
+  cardHeader: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: Spacing.xs,
+    marginBottom: Spacing.xs,
+  },
   label: {
     fontSize: FontSizes.caption,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 1,
   },
   total: {
-    fontSize: FontSizes.h1,
+    fontSize: FontSizes.h2,
     fontWeight: '700' as const,
-    marginTop: Spacing.xs,
   },
 };

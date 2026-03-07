@@ -389,8 +389,11 @@ export default function ExpensesScreen() {
         ListHeaderComponent={
           <View style={headerStyles.wrap}>
             <Text style={headerStyles.filterLabel}>{filterLabel}</Text>
-            <View style={[headerStyles.card, { backgroundColor: Colors.errorMuted }]}>
-              <Text style={headerStyles.label}>Total</Text>
+            <View style={[headerStyles.card, { backgroundColor: Colors.errorMuted, borderColor: 'rgba(255, 59, 48, 0.3)' }]}>
+              <View style={headerStyles.cardHeader}>
+                <MaterialIcons name="trending-down" size={16} color={Colors.error} />
+                <Text style={[headerStyles.label, { color: Colors.error }]}>Total Gastos</Text>
+              </View>
               <Text style={[headerStyles.total, { color: Colors.error }]}>
                 ${formatAmountNumber(total)}
               </Text>
@@ -461,20 +464,23 @@ const headerStyles = {
   },
   card: {
     borderRadius: 16,
-    padding: Spacing.lg,
+    padding: Spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(255, 59, 48, 0.3)',
+  },
+  cardHeader: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: Spacing.xs,
+    marginBottom: Spacing.xs,
   },
   label: {
     fontSize: FontSizes.caption,
     fontWeight: '600' as const,
-    color: Colors.textSecondary,
     textTransform: 'uppercase' as const,
     letterSpacing: 1,
   },
   total: {
-    fontSize: FontSizes.h1,
+    fontSize: FontSizes.h2,
     fontWeight: '700' as const,
-    marginTop: Spacing.xs,
   },
 };
