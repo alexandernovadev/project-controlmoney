@@ -1,5 +1,6 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, Button } from 'react-native';
+import { auth } from '@/firebaseConfig';
 
 import { Collapsible } from '@/components/ui/collapsible';
 import { ExternalLink } from '@/components/external-link';
@@ -30,6 +31,7 @@ export default function TabTwoScreen() {
           Explore
         </ThemedText>
       </ThemedView>
+      <Button title="Cerrar Sesión" onPress={() => auth.signOut()} color="#ff3b30" />
       <ThemedText>This app includes example code to help you get started.</ThemedText>
       <Collapsible title="File-based routing">
         <ThemedText>

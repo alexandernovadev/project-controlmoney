@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "441923672949",
+    "project_id": "projyect-controlmoney",
+    "storage_bucket": "projyect-controlmoney.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:441923672949:android:250a6492ab96225f17913c",
+        "android_client_info": {
+          "package_name": "com.nova.moneycontrol"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "441923672949-kvb9s0p48ooi8jkrhsfj0ldqsp7ohati.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nova.moneycontrol",
+            "certificate_hash": "8b3ef8b1bcd24afb18eb9c1b0fb9a1a884fd20e0"
+          }
+        },
+        {
+          "client_id": "441923672949-01lt4oa6399n6bes5l2cjhjkimjefjhb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCMGh7WTfJW60XgcITNhAqfOc4ThIMvT-k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "441923672949-01lt4oa6399n6bes5l2cjhjkimjefjhb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
