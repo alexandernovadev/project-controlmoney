@@ -4,7 +4,7 @@
 
 import { StyleSheet } from 'react-native';
 import { Colors } from './colors';
-import { Typography } from './typography';
+import { Typography, FontSizes } from './typography';
 import { Spacing } from './spacing';
 
 export const BaseStyles = StyleSheet.create({
@@ -23,7 +23,7 @@ export const BaseStyles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     color: Colors.text,
-    fontSize: 16,
+    fontSize: FontSizes.body,
   },
   buttonPrimary: {
     backgroundColor: Colors.accent,

@@ -23,8 +23,11 @@ export const Colors = {
 
   // Semantic
   success: '#34C759',
+  successMuted: 'rgba(52, 199, 89, 0.2)',
   error: '#FF3B30',
+  errorMuted: 'rgba(255, 59, 48, 0.2)',
   warning: '#FF9500',
+  warningMuted: 'rgba(255, 149, 0, 0.2)',
 
   // UI
   border: '#2C2C2E',

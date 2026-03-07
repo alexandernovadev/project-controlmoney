@@ -1,115 +1,202 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet, Button } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { auth } from '@/lib/firebase';
-import { Colors } from '@/lib/theme';
-
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
+import { Colors, Spacing } from '@/lib/theme';
+import {
+  Button,
+  Card,
+  Input,
+  AmountInput,
+  Select,
+  Badge,
+  ListItem,
+  Divider,
+} from '@/components/ui';
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
 
-export default function TabTwoScreen() {
+const CATEGORY_OPTIONS = [
+  { label: 'Alimentación', value: 'food' },
+  { label: 'Transporte', value: 'transport' },
+  { label: 'Servicios', value: 'services' },
+  { label: 'Otros', value: 'other' },
+];
+
+export default function ExploreScreen() {
+  const [inputValue, setInputValue] = useState('');
+  const [amountValue, setAmountValue] = useState('');
+  const [selectValue, setSelectValue] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleLoadingDemo = () => {
+    setLoading(true);
+    setTimeout(() => setLoading(false), 1500);
+  };
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={Colors.backgroundSecondary}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color={Colors.textMuted}
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <ThemedText type="title" style={styles.pageTitle}>
+        UI Components
+      </ThemedText>
+
+      {/* Buttons */}
+      <Card>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Button
+        </ThemedText>
+        <View style={styles.row}>
+          <Button title="Primary" variant="primary" onPress={() => {}} />
+          <Button title="Secondary" variant="secondary" onPress={() => {}} />
+        </View>
+        <View style={styles.row}>
+          <Button title="Danger" variant="danger" onPress={() => {}} />
+          <Button title="Outline" variant="outline" onPress={() => {}} />
+        </View>
+        <View style={styles.row}>
+          <Button
+            title={loading ? 'Loading...' : 'Loading demo'}
+            variant="primary"
+            loading={loading}
+            onPress={handleLoadingDemo}
+          />
+        </View>
+        <Button title="Full width" variant="primary" fullWidth onPress={() => {}} />
+      </Card>
+
+      {/* Input */}
+      <Card>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Input
+        </ThemedText>
+        <Input
+          label="Email"
+          placeholder="Enter your email"
+          value={inputValue}
+          onChangeText={setInputValue}
         />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <Button title="Cerrar Sesión" onPress={() => auth.signOut()} color={Colors.error} />
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(home)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(home)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(home)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
+        <Input
+          label="With error"
+          placeholder="Invalid input"
+          error="This field is required"
         />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
+      </Card>
+
+      {/* AmountInput */}
+      <Card>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          AmountInput
         </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
+        <AmountInput
+          label="Amount"
+          value={amountValue}
+          onChangeValue={setAmountValue}
+          currencySymbol="$"
+          placeholder="0.00"
+        />
+      </Card>
+
+      {/* Select */}
+      <Card>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Select
         </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+        <Select
+          label="Category"
+          placeholder="Choose category"
+          value={selectValue}
+          onValueChange={setSelectValue}
+          options={CATEGORY_OPTIONS}
+        />
+      </Card>
+
+      {/* Badge */}
+      <Card>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          Badge
+        </ThemedText>
+        <View style={styles.badgeRow}>
+          <Badge label="Income" variant="income" />
+          <Badge label="Expense" variant="expense" />
+          <Badge label="Neutral" variant="neutral" />
+          <Badge label="Warning" variant="warning" />
+        </View>
+        <View style={styles.badgeRow}>
+          <Badge label="Small" variant="income" size="sm" />
+          <Badge label="Medium" variant="expense" size="md" />
+        </View>
+      </Card>
+
+      {/* ListItem */}
+      <Card>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>
+          ListItem
+        </ThemedText>
+        <ListItem
+          title="Supermercado"
+          subtitle="Grocery store"
+          amount="-$45.50"
+          amountType="expense"
+          leftIcon={<MaterialIcons name="shopping-cart" size={24} color={Colors.icon} />}
+          onPress={() => {}}
+        />
+        <Divider spacing="xs" />
+        <ListItem
+          title="Salary"
+          subtitle="Monthly income"
+          amount="+$2,500"
+          amountType="income"
+          leftIcon={<MaterialIcons name="payments" size={24} color={Colors.icon} />}
+          onPress={() => {}}
+        />
+        <Divider spacing="xs" />
+        <ListItem
+          title="Coffee"
+          amount="-$4.00"
+          amountType="expense"
+          leftIcon={<MaterialIcons name="coffee" size={24} color={Colors.icon} />}
+        />
+      </Card>
+
+      {/* Logout */}
+      <Button
+        title="Cerrar Sesión"
+        variant="danger"
+        fullWidth
+        onPress={() => auth.signOut()}
+        style={styles.logoutBtn}
+      />
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: Colors.textMuted,
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  screen: {
+    flex: 1,
+    backgroundColor: Colors.background,
   },
-  titleContainer: {
+  content: {
+    padding: Spacing.lg,
+    paddingBottom: Spacing['2xl'],
+  },
+  pageTitle: {
+    marginBottom: Spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: Spacing.md,
+  },
+  row: {
     flexDirection: 'row',
-    gap: 8,
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  logoutBtn: {
+    marginTop: Spacing.xl,
   },
 });
