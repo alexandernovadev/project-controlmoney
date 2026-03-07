@@ -30,6 +30,7 @@ const schema = z.object({
   amount: z.string().min(1, 'Required'),
   description: z.string().min(1, 'Required'),
   categoryId: z.string().min(1, 'Required'),
+  brand: z.string().optional(),
   store: z.string().optional(),
   storeAddress: z.string().optional(),
   storeCountry: z.string().optional(),
@@ -78,6 +79,7 @@ export default function ExpenseFormScreen() {
       amount: '',
       description: '',
       categoryId: '',
+      brand: '',
       store: '',
       storeAddress: '',
       storeCountry: '',
@@ -114,6 +116,7 @@ export default function ExpenseFormScreen() {
             amount: String(tx.amount),
             description: tx.description,
             categoryId: tx.categoryId ?? '',
+            brand: tx.brand ?? '',
             store:
               typeof tx.store === 'string'
                 ? tx.store
@@ -172,6 +175,7 @@ export default function ExpenseFormScreen() {
         amount: parseFloat(values.amount) || 0,
         description: values.description,
         categoryId: values.categoryId || undefined,
+        brand: values.brand?.trim() || undefined,
         store,
         quantity: Math.min(1000, Math.max(1, parseFloat(values.quantity) || 1)),
         unit: (values.unit || undefined) as Unit | undefined,
@@ -239,6 +243,18 @@ export default function ExpenseFormScreen() {
               onChangeText={onChange}
               placeholder="e.g. Supermarket, Cinema"
               error={errors.description?.message}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="brand"
+          render={({ field: { onChange, value } }) => (
+            <Input
+              label="Brand (optional)"
+              value={value}
+              onChangeText={onChange}
+              placeholder="e.g. Nike, Apple"
             />
           )}
         />

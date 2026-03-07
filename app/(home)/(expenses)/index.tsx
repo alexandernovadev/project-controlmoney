@@ -63,6 +63,7 @@ function ExpenseCard({
   const subtitle = subtitleParts.join(' · ');
 
   const hasExpandedContent =
+    item.brand != null ||
     item.quantity != null ||
     item.unit != null ||
     storeName != null ||
@@ -122,6 +123,12 @@ function ExpenseCard({
       {isExpanded && hasExpandedContent && (
         <View style={cardStyles.expanded}>
           <View style={cardStyles.divider} />
+          {item.brand != null && item.brand !== '' && (
+            <View style={cardStyles.detailRow}>
+              <Text style={cardStyles.detailLabel}>Marca</Text>
+              <Text style={cardStyles.detailValue}>{item.brand}</Text>
+            </View>
+          )}
           {item.quantity != null && (
             <View style={cardStyles.detailRow}>
               <Text style={cardStyles.detailLabel}>Cantidad</Text>
@@ -336,6 +343,7 @@ export default function ExpensesScreen() {
     filtered = filtered.filter(
       (t) =>
         t.description?.toLowerCase().includes(search.toLowerCase()) ||
+        t.brand?.toLowerCase().includes(search.toLowerCase()) ||
         getStoreName(t).toLowerCase().includes(search.toLowerCase()) ||
         (categoryMap[t.categoryId ?? '']?.toLowerCase().includes(search.toLowerCase())) ||
         (t.comment?.toLowerCase().includes(search.toLowerCase()))

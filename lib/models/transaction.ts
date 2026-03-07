@@ -41,6 +41,7 @@ export type Transaction = {
 
   // Expense
   store?: string | StoreInfo;
+  brand?: string;
   quantity?: number;
   unit?: Unit;
   unitPrice?: number;

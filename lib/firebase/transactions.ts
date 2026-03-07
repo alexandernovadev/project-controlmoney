@@ -44,6 +44,7 @@ const toTransaction = (id: string, data: Record<string, unknown>): Transaction =
     updatedAt: toDate(data.updatedAt),
     categoryId: data.categoryId ? String(data.categoryId) : undefined,
     store: data.store as Transaction['store'],
+    brand: data.brand ? String(data.brand) : undefined,
     quantity: data.quantity != null ? Number(data.quantity) : undefined,
     unit: data.unit as Transaction['unit'],
     unitPrice: data.unitPrice != null ? Number(data.unitPrice) : undefined,
