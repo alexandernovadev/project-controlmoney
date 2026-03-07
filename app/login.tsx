@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { StyleSheet, View, TextInput, Button, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
-import { auth } from '../firebaseConfig';
+import { auth } from '@/lib/firebase';
 import { useRouter } from 'expo-router';
 
 // Configura Google Sign-in usando el webClientId de tu google-services.json

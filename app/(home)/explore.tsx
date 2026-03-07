@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { Platform, StyleSheet, Button } from 'react-native';
-import { auth } from '@/firebaseConfig';
+import { auth } from '@/lib/firebase';
 
 import { Collapsible } from '@/components/ui/collapsible';
 import { ExternalLink } from '@/components/external-link';
