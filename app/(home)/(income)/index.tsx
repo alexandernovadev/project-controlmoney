@@ -52,7 +52,6 @@ type IncomeCardProps = {
 function IncomeCard({ item, paymentMethodLabel, categoryLabel, onPress, onLongPress }: IncomeCardProps) {
   const subtitleParts = [
     categoryLabel ?? paymentMethodLabel ?? item.source ?? null,
-    formatDateShort(item.date),
   ].filter(Boolean);
   const subtitle = subtitleParts.join(' · ');
 
@@ -60,20 +59,30 @@ function IncomeCard({ item, paymentMethodLabel, categoryLabel, onPress, onLongPr
     <Card
       onPress={onPress}
       onLongPress={onLongPress}
-      padding="md"
-      style={{ borderLeftWidth: 4, borderLeftColor: Colors.success }}
+      padding="sm"
+      style={{ borderLeftWidth: 4, borderLeftColor: Colors.success, paddingHorizontal: 12, paddingVertical: 10 }}
     >
-      <View style={cardStyles.row}>
-        <View style={cardStyles.content}>
-          <Text style={cardStyles.title} numberOfLines={1}>
-            {item.description || item.source || 'Income'}
-          </Text>
-          <Text style={cardStyles.subtitle}>
-            {subtitle || '—'}
+      <View style={cardStyles.container}>
+        {/* Row 1: Description */}
+        <Text style={cardStyles.title}>
+          {item.description || item.source || 'Income'}
+        </Text>
+        
+        {/* Row 2: Category and Price */}
+        <View style={cardStyles.middleRow}>
+          {subtitle ? (
+            <Text style={cardStyles.subtitle}>
+              {subtitle}
+            </Text>
+          ) : <View style={{ flex: 1 }} />}
+          <Text style={[cardStyles.amount, { color: Colors.success }]}>
+            +${formatAmountNumber(item.amount)}
           </Text>
         </View>
-        <Text style={[cardStyles.amount, { color: Colors.success }]}>
-          +${formatAmountNumber(item.amount)}
+
+        {/* Row 3: Date */}
+        <Text style={cardStyles.date}>
+          {formatDateShort(item.date)}
         </Text>
       </View>
     </Card>
@@ -81,13 +90,14 @@ function IncomeCard({ item, paymentMethodLabel, categoryLabel, onPress, onLongPr
 }
 
 const cardStyles = {
-  row: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
+  container: {
+    flexDirection: 'column' as const,
+    gap: 2,
   },
-  content: {
-    flex: 1,
-    minWidth: 0,
+  middleRow: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
   },
   title: {
     fontSize: FontSizes.body,
@@ -97,7 +107,13 @@ const cardStyles = {
   subtitle: {
     fontSize: FontSizes.caption,
     color: Colors.textSecondary,
-    marginTop: 2,
+    flex: 1,
+    paddingRight: 8,
+  },
+  date: {
+    fontSize: FontSizes.caption,
+    color: Colors.textSecondary,
+    opacity: 0.8,
   },
   amount: {
     fontSize: FontSizes.bodyLg,

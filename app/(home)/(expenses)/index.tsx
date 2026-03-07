@@ -59,7 +59,6 @@ function ExpenseCard({
   const storeName = typeof item.store === 'string' ? item.store : item.store?.name;
   const subtitleParts = [
     categoryLabel ?? null,
-    formatDateShort(item.date),
   ].filter(Boolean);
   const subtitle = subtitleParts.join(' · ');
 
@@ -75,29 +74,39 @@ function ExpenseCard({
     <Card
       onPress={onToggleExpand}
       onLongPress={onLongPress}
-      padding="md"
-      style={{ borderLeftWidth: 4, borderLeftColor: Colors.error }}
+      padding="sm"
+      style={{ borderLeftWidth: 4, borderLeftColor: Colors.error, paddingHorizontal: 12, paddingVertical: 10 }}
     >
-      <View style={cardStyles.row}>
-        <View style={cardStyles.content}>
-          <Text style={cardStyles.title} numberOfLines={1}>
-            {item.description || 'Expense'}
-          </Text>
-          <Text style={cardStyles.subtitle} numberOfLines={1}>
-            {subtitle || '—'}
-          </Text>
+      <View style={cardStyles.container}>
+        {/* Row 1: Description */}
+        <Text style={cardStyles.title}>
+          {item.description || 'Expense'}
+        </Text>
+
+        {/* Row 2: Category and Price */}
+        <View style={cardStyles.middleRow}>
+          {subtitle ? (
+            <Text style={cardStyles.subtitle}>
+              {subtitle}
+            </Text>
+          ) : <View style={{ flex: 1 }} />}
+          <View style={cardStyles.right}>
+            <Text style={[cardStyles.amount, { color: Colors.error }]}>
+              -${formatAmountNumber(item.amount)}
+            </Text>
+            <MaterialIcons
+              name={isExpanded ? 'expand-less' : 'expand-more'}
+              size={24}
+              color={Colors.textSecondary}
+              style={{ marginLeft: Spacing.xs }}
+            />
+          </View>
         </View>
-        <View style={cardStyles.right}>
-          <Text style={[cardStyles.amount, { color: Colors.error }]}>
-            -${formatAmountNumber(item.amount)}
-          </Text>
-          <MaterialIcons
-            name={isExpanded ? 'expand-less' : 'expand-more'}
-            size={24}
-            color={Colors.textSecondary}
-            style={{ marginLeft: Spacing.xs }}
-          />
-        </View>
+
+        {/* Row 3: Date */}
+        <Text style={cardStyles.date}>
+          {formatDateShort(item.date)}
+        </Text>
       </View>
 
       {isExpanded && hasExpandedContent && (
@@ -176,13 +185,14 @@ function ExpenseCard({
 }
 
 const cardStyles = {
-  row: {
-    flexDirection: 'row' as const,
-    alignItems: 'center' as const,
+  container: {
+    flexDirection: 'column' as const,
+    gap: 2,
   },
-  content: {
-    flex: 1,
-    minWidth: 0,
+  middleRow: {
+    flexDirection: 'row' as const,
+    justifyContent: 'space-between' as const,
+    alignItems: 'center' as const,
   },
   right: {
     flexDirection: 'row' as const,
@@ -196,7 +206,13 @@ const cardStyles = {
   subtitle: {
     fontSize: FontSizes.caption,
     color: Colors.textSecondary,
-    marginTop: 2,
+    flex: 1,
+    paddingRight: 8,
+  },
+  date: {
+    fontSize: FontSizes.caption,
+    color: Colors.textSecondary,
+    opacity: 0.8,
   },
   amount: {
     fontSize: FontSizes.bodyLg,
