@@ -11,7 +11,7 @@ import { subscribeExpenseTransactions, subscribeIncomeTransactions } from '@/lib
 import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
-import { getMonthRange } from '@/lib/utils/format-date';
+import { formatDateShort, getMonthRange } from '@/lib/utils/format-date';
 
 // We'll reuse the Expense Filter Modal types for the generic period filter
 import { IncomeFilterModal, type IncomeFilterValues } from '@/components/ui/filter-modal';
@@ -315,7 +315,7 @@ export default function HomeScreen() {
                 <View style={styles.recentRow}>
                   <View style={styles.recentInfo}>
                     <Text style={styles.recentTitle} numberOfLines={1}>{t.description}</Text>
-                    <Text style={styles.recentDate}>{new Date(t.date).toLocaleDateString()}</Text>
+                    <Text style={styles.recentDate}>{formatDateShort(t.date)}</Text>
                   </View>
                   <Text style={styles.recentAmount}>-${formatAmountNumber(t.amount)}</Text>
                 </View>

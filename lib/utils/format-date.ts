@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 export type MonthRange = { start: string; end: string };
 
 /**
@@ -17,11 +19,21 @@ export function getMonthRange(year?: number, month?: number): MonthRange {
 }
 
 /**
- * Format date for display (e.g. "7 Mar", "28 Feb")
+ * Format date for display (e.g. "Monday 5 Feb 2026 at 5:21:45PM")
  */
 export function formatDateShort(isoDate: string): string {
-  const d = new Date(isoDate);
-  const day = d.getDate();
-  const month = d.toLocaleString('default', { month: 'short' });
-  return `${day} ${month}`;
+  if (!isoDate) return '';
+  const dt = DateTime.fromISO(isoDate).setLocale('en-US');
+  return dt.isValid ? dt.toFormat("EEEE d MMM yyyy 'at' h:mm:ssa") : isoDate;
+}
+
+/**
+ * Returns today's date in local time as "YYYY-MM-DD"
+ */
+export function todayLocalISO(): string {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }

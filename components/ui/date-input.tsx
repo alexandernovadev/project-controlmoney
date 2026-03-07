@@ -3,23 +3,31 @@ import { View, Text, Pressable, StyleSheet, Platform } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Colors, Spacing, FontSizes } from '@/lib/theme';
+import { DateTime } from 'luxon';
 
 export type DateInputProps = {
   value: string;
   onChangeValue: (value: string) => void;
   label?: string;
   error?: string;
+  mode?: 'date' | 'datetime';
 };
 
-function formatDisplay(isoDate: string): string {
-  if (!isoDate) return '';
-  // Se añade T12:00:00 para forzar el mediodía y evitar saltos de día por zona horaria
-  const d = new Date(isoDate.includes('T') ? isoDate : isoDate + 'T12:00:00');
-  return d.toLocaleDateString('default', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
+function formatDisplay(value: string, mode: 'date' | 'datetime'): string {
+  if (!value) return '';
+  if (mode === 'date') {
+    // Se añade T12:00:00 para forzar el mediodía y evitar saltos de día por zona horaria
+    const d = new Date(value.includes('T') ? value : value + 'T12:00:00');
+    return d.toLocaleDateString('default', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
+  } else {
+    // Datetime mode
+    const dt = DateTime.fromISO(value);
+    return dt.isValid ? dt.toFormat("MMM d, yyyy 'at' h:mm a") : value;
+  }
 }
 
 export function DateInput({
@@ -27,23 +35,62 @@ export function DateInput({
   onChangeValue,
   label,
   error,
+  mode = 'date',
 }: DateInputProps) {
-  const [show, setShow] = useState(false);
-  const dateValue = value ? new Date(value.includes('T') ? value : value + 'T12:00:00') : new Date();
+  const [showPicker, setShowPicker] = useState<'date' | 'time' | 'datetime' | false>(false);
+  
+  const dateValue = value 
+    ? new Date(mode === 'date' && !value.includes('T') ? value + 'T12:00:00' : value) 
+    : new Date();
 
   const handleChange = (_: unknown, selectedDate?: Date) => {
-    if (Platform.OS === 'android') setShow(false);
-    if (selectedDate) {
-      // Extraemos la fecha local en formato YYYY-MM-DD sin usar toISOString para evitar el desfase
-      const year = selectedDate.getFullYear();
-      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-      const day = String(selectedDate.getDate()).padStart(2, '0');
-      onChangeValue(`${year}-${month}-${day}`);
+    if (Platform.OS === 'android') {
+      if (showPicker === 'date') {
+        if (selectedDate) {
+          if (mode === 'datetime') {
+            const newDate = new Date(dateValue);
+            newDate.setFullYear(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+            onChangeValue(newDate.toISOString());
+            setShowPicker('time');
+          } else {
+            const year = selectedDate.getFullYear();
+            const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+            const day = String(selectedDate.getDate()).padStart(2, '0');
+            onChangeValue(`${year}-${month}-${day}`);
+            setShowPicker(false);
+          }
+        } else {
+          setShowPicker(false);
+        }
+      } else if (showPicker === 'time') {
+        if (selectedDate) {
+          const newDate = new Date(dateValue);
+          newDate.setHours(selectedDate.getHours(), selectedDate.getMinutes(), selectedDate.getSeconds());
+          onChangeValue(newDate.toISOString());
+        }
+        setShowPicker(false);
+      }
+    } else {
+      // iOS
+      if (selectedDate) {
+        if (mode === 'date') {
+          const year = selectedDate.getFullYear();
+          const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+          const day = String(selectedDate.getDate()).padStart(2, '0');
+          onChangeValue(`${year}-${month}-${day}`);
+        } else {
+          onChangeValue(selectedDate.toISOString());
+        }
+      }
     }
   };
 
   const handlePress = () => {
-    setShow(true);
+    if (Platform.OS === 'android') {
+      setShowPicker('date');
+    } else {
+      setShowPicker(mode === 'datetime' ? 'datetime' : 'date');
+    }
   };
 
   return (
@@ -54,27 +101,37 @@ export function DateInput({
         style={[styles.trigger, error && styles.triggerError]}
       >
         <Text style={[styles.triggerText, !value && styles.placeholder]}>
-          {value ? formatDisplay(value) : 'Select date'}
+          {value ? formatDisplay(value, mode) : (mode === 'date' ? 'Select date' : 'Select date & time')}
         </Text>
         <MaterialIcons
-          name="event"
+          name={mode === 'date' ? "event" : "access-time"}
           size={22}
           color={Colors.textSecondary}
         />
       </Pressable>
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      {show && (
+      
+      {showPicker && Platform.OS === 'android' && (
         <DateTimePicker
           value={dateValue}
-          mode="date"
-          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          mode={showPicker as 'date' | 'time'}
+          display="default"
           onChange={handleChange}
         />
       )}
-      {show && Platform.OS === 'ios' && (
-        <Pressable style={styles.iosDone} onPress={() => setShow(false)}>
-          <Text style={styles.iosDoneText}>Done</Text>
-        </Pressable>
+      
+      {showPicker && Platform.OS === 'ios' && (
+        <View>
+          <DateTimePicker
+            value={dateValue}
+            mode={showPicker as 'date' | 'datetime'}
+            display="spinner"
+            onChange={handleChange}
+          />
+          <Pressable style={styles.iosDone} onPress={() => setShowPicker(false)}>
+            <Text style={styles.iosDoneText}>Done</Text>
+          </Pressable>
+        </View>
       )}
     </View>
   );

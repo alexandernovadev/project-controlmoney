@@ -1,28 +1,29 @@
-import { useState, useEffect } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigation } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet } from 'react-native';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { z } from 'zod';
 
-import { useAuth } from '@/context/auth';
-import {
-  getTransaction,
-  createTransaction,
-  updateTransaction,
-} from '@/lib/firebase/transactions';
-import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
-import { getCategories } from '@/lib/firebase/categories';
-import type { IncomePaymentMethod, Category } from '@/lib/models';
 import { ThemedView } from '@/components/themed-view';
-import { Input } from '@/components/ui/input';
-import { DateInput } from '@/components/ui/date-input';
-import { Button } from '@/components/ui/button';
 import { AmountInput } from '@/components/ui/amount-input';
+import { Button } from '@/components/ui/button';
+import { DateInput } from '@/components/ui/date-input';
+import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import type { SelectOption } from '@/components/ui/select-modal';
+import { useAuth } from '@/context/auth';
+import { getCategories } from '@/lib/firebase/categories';
+import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
+import {
+  createTransaction,
+  getTransaction,
+  updateTransaction,
+} from '@/lib/firebase/transactions';
+import type { Category, IncomePaymentMethod } from '@/lib/models';
 import { Colors, Spacing } from '@/lib/theme';
 
 const schema = z.object({
@@ -36,15 +37,12 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-function todayISO(): string {
-  return new Date().toISOString().split('T')[0];
-}
-
 export default function IncomeFormScreen() {
   const { user } = useAuth();
   const navigation = useNavigation();
   const params = useLocalSearchParams<{ id?: string }>();
   const insets = useSafeAreaInsets();
+  const headerHeight = useHeaderHeight();
   const id = params.id;
   const isEdit = !!id;
 
@@ -70,7 +68,7 @@ export default function IncomeFormScreen() {
       source: '',
       paymentMethodId: '',
       categoryId: '',
-      date: todayISO(),
+      date: new Date().toISOString(),
     },
   });
 
@@ -100,7 +98,7 @@ export default function IncomeFormScreen() {
             source: tx.source ?? '',
             paymentMethodId: tx.paymentMethodId ?? '',
             categoryId: tx.categoryId ?? '',
-            date: tx.date.split('T')[0],
+            date: tx.date,
           });
         } else {
           setFetchError('Income not found');
@@ -124,7 +122,7 @@ export default function IncomeFormScreen() {
         source: values.source || undefined,
         paymentMethodId: values.paymentMethodId || undefined,
         categoryId: values.categoryId || undefined,
-        date: new Date(values.date).toISOString(),
+        date: values.date,
       };
       if (isEdit && id) {
         await updateTransaction(user.uid, id, payload);
@@ -158,38 +156,43 @@ export default function IncomeFormScreen() {
 
   return (
     <ThemedView
-      style={[styles.container, { paddingBottom: insets.bottom + Spacing.lg }]}
+      style={[styles.container, { paddingBottom: insets.bottom }]}
     >
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView 
+        style={styles.keyboardView}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={headerHeight}
       >
-        <Controller
-          control={control}
-          name="amount"
-          render={({ field: { onChange, value } }) => (
-            <AmountInput
-              label="Amount"
-              value={value}
-              onChangeValue={onChange}
-              error={errors.amount?.message}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="description"
-          render={({ field: { onChange, value } }) => (
-            <Input
-              label="Description"
-              value={value}
-              onChangeText={onChange}
-              placeholder="e.g. Salary, Freelance"
-              error={errors.description?.message}
-            />
-          )}
-        />
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={[styles.scrollContent, { paddingBottom: Spacing.lg * 2 }]}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Controller
+            control={control}
+            name="description"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="Description"
+                value={value}
+                onChangeText={onChange}
+                placeholder="e.g. Salary, Freelance"
+                error={errors.description?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="amount"
+            render={({ field: { onChange, value } }) => (
+              <AmountInput
+                label="Amount"
+                value={value}
+                onChangeValue={onChange}
+                error={errors.amount?.message}
+              />
+            )}
+          />
         <Controller
           control={control}
           name="source"
@@ -237,6 +240,7 @@ export default function IncomeFormScreen() {
               value={value}
               onChangeValue={onChange}
               error={errors.date?.message}
+              mode="datetime"
             />
           )}
         />
@@ -246,7 +250,8 @@ export default function IncomeFormScreen() {
           loading={loading}
           fullWidth
         />
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </ThemedView>
   );
 }
@@ -262,5 +267,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   scroll: { flex: 1 },
+  keyboardView: { flex: 1 },
   scrollContent: { padding: Spacing.lg },
 });

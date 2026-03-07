@@ -1,29 +1,29 @@
-import { useState, useEffect } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useNavigation } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Controller, useForm } from 'react-hook-form';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { z } from 'zod';
 
-import { useAuth } from '@/context/auth';
-import {
-  getTransaction,
-  createTransaction,
-  updateTransaction,
-} from '@/lib/firebase/transactions';
-import { getCategories } from '@/lib/firebase/categories';
-import type { Category, Unit } from '@/lib/models';
-import { UNITS } from '@/lib/models/unit';
 import { ThemedView } from '@/components/themed-view';
-import { Input } from '@/components/ui/input';
-import { DateInput } from '@/components/ui/date-input';
-import { Button } from '@/components/ui/button';
 import { AmountInput } from '@/components/ui/amount-input';
+import { Button } from '@/components/ui/button';
+import { Collapsible } from '@/components/ui/collapsible';
+import { DateInput } from '@/components/ui/date-input';
+import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import type { SelectOption } from '@/components/ui/select-modal';
-import { Collapsible } from '@/components/ui/collapsible';
+import { useAuth } from '@/context/auth';
+import { getCategories } from '@/lib/firebase/categories';
+import {
+  createTransaction,
+  getTransaction,
+  updateTransaction,
+} from '@/lib/firebase/transactions';
+import type { Category, Unit } from '@/lib/models';
+import { UNITS } from '@/lib/models/unit';
 import { Colors, Spacing } from '@/lib/theme';
 
 const schema = z.object({
@@ -50,10 +50,6 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
-
-function todayISO(): string {
-  return new Date().toISOString().split('T')[0];
-}
 
 export default function ExpenseFormScreen() {
   const { user } = useAuth();
@@ -92,7 +88,7 @@ export default function ExpenseFormScreen() {
       unitPrice: '',
       rating: '',
       comment: '',
-      date: todayISO(),
+      date: new Date().toISOString(),
     },
   });
 
@@ -131,7 +127,7 @@ export default function ExpenseFormScreen() {
             unitPrice: tx.unitPrice != null ? String(tx.unitPrice) : '',
             rating: tx.rating != null ? String(tx.rating) : '',
             comment: tx.comment ?? '',
-            date: tx.date.split('T')[0],
+            date: tx.date,
           });
         } else {
           setFetchError('Expense not found');
@@ -182,7 +178,7 @@ export default function ExpenseFormScreen() {
         unitPrice: values.unitPrice ? parseFloat(values.unitPrice) : undefined,
         rating: values.rating ? parseInt(values.rating, 10) : undefined,
         comment: values.comment || undefined,
-        date: new Date(values.date).toISOString(),
+        date: values.date,
       };
       if (isEdit && id) {
         await updateTransaction(user.uid, id, payload);
@@ -232,18 +228,7 @@ export default function ExpenseFormScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Controller
-          control={control}
-          name="amount"
-          render={({ field: { onChange, value } }) => (
-            <AmountInput
-              label="Amount"
-              value={value}
-              onChangeValue={onChange}
-              error={errors.amount?.message}
-            />
-          )}
-        />
+
         <Controller
           control={control}
           name="description"
@@ -254,6 +239,18 @@ export default function ExpenseFormScreen() {
               onChangeText={onChange}
               placeholder="e.g. Supermarket, Cinema"
               error={errors.description?.message}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="amount"
+          render={({ field: { onChange, value } }) => (
+            <AmountInput
+              label="Amount"
+              value={value}
+              onChangeValue={onChange}
+              error={errors.amount?.message}
             />
           )}
         />
@@ -305,56 +302,56 @@ export default function ExpenseFormScreen() {
         />
         <View style={styles.collapsibleWrap}>
           <Collapsible title="Store details (advanced)">
-          <Controller
-            control={control}
-            name="storeAddress"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Address"
-                value={value}
-                onChangeText={onChange}
-                placeholder="Street, city..."
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="storeCountry"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Country"
-                value={value}
-                onChangeText={onChange}
-                placeholder="e.g. Colombia"
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="storeLat"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Latitude"
-                value={value}
-                onChangeText={onChange}
-                placeholder="e.g. 4.7110"
-                keyboardType="decimal-pad"
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="storeLng"
-            render={({ field: { onChange, value } }) => (
-              <Input
-                label="Longitude"
-                value={value}
-                onChangeText={onChange}
-                placeholder="e.g. -74.0721"
-                keyboardType="decimal-pad"
-              />
-            )}
-          />
+            <Controller
+              control={control}
+              name="storeAddress"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Address"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="Street, city..."
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="storeCountry"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Country"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="e.g. Colombia"
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="storeLat"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Latitude"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="e.g. 4.7110"
+                  keyboardType="decimal-pad"
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="storeLng"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Longitude"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="e.g. -74.0721"
+                  keyboardType="decimal-pad"
+                />
+              )}
+            />
           </Collapsible>
         </View>
         <View style={styles.rowFields}>
@@ -423,6 +420,7 @@ export default function ExpenseFormScreen() {
               value={value}
               onChangeValue={onChange}
               error={errors.date?.message}
+              mode="datetime"
             />
           )}
         />
