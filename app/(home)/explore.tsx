@@ -9,6 +9,7 @@ import {
   Input,
   AmountInput,
   Select,
+  SelectModal,
   Badge,
   ListItem,
   Divider,
@@ -22,10 +23,23 @@ const CATEGORY_OPTIONS = [
   { label: 'Otros', value: 'other' },
 ];
 
+const SEARCHABLE_OPTIONS = [
+  { label: 'Alimentación', value: 'food' },
+  { label: 'Transporte', value: 'transport' },
+  { label: 'Servicios', value: 'services' },
+  { label: 'Supermercado', value: 'supermarket' },
+  { label: 'Restaurantes', value: 'restaurants' },
+  { label: 'Gasolina', value: 'gas' },
+  { label: 'Entretenimiento', value: 'entertainment' },
+  { label: 'Salud', value: 'health' },
+  { label: 'Otros', value: 'other' },
+];
+
 export default function ExploreScreen() {
   const [inputValue, setInputValue] = useState('');
   const [amountValue, setAmountValue] = useState('');
   const [selectValue, setSelectValue] = useState<string | null>(null);
+  const [selectSearchableValue, setSelectSearchableValue] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const handleLoadingDemo = () => {
@@ -95,17 +109,26 @@ export default function ExploreScreen() {
         />
       </Card>
 
-      {/* Select */}
+      {/* Select / SelectModal */}
       <Card>
         <ThemedText type="subtitle" style={styles.sectionTitle}>
           Select
         </ThemedText>
-        <Select
-          label="Category"
+        <SelectModal
+          label="SelectModal (simple)"
           placeholder="Choose category"
           value={selectValue}
           onValueChange={setSelectValue}
           options={CATEGORY_OPTIONS}
+        />
+        <Select
+          label="Select (with search)"
+          placeholder="Choose category"
+          searchPlaceholder="Search category..."
+          value={selectSearchableValue}
+          onValueChange={setSelectSearchableValue}
+          options={SEARCHABLE_OPTIONS}
+          searchable
         />
       </Card>
 
