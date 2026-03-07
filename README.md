@@ -1,50 +1,65 @@
-# Welcome to your Expo app 👋
+# Control Money App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App para registrar e analisar gastos e receitas pessoais. Objetivo: manter tudo organizado e gerar relatórios detalhados do fluxo de dinheiro.
 
-## Get started
+## Objetivo do projeto
 
-1. Install dependencies
+Manter um controle claro das finanças pessoais com relatórios úteis como:
+
+- **Gastos do mês** — total e detalhamento por categoria
+- **Maior gasto do mês** — o que mais custou
+- **Maior receita** — de onde vem a maior entrada de dinheiro
+- **Melhor produto/serviço** — análise de gastos por conceito
+- **Gasto semanal** — tendências por semana
+- E muito mais relatórios no futuro
+
+## Stack técnico
+
+- **Expo** (React Native) + **Expo Router** (file-based routing)
+- **Firebase** — Auth (email, Google) e banco de dados
+- **TypeScript**
+
+## Estrutura do projeto
+
+```
+app/              # Rotas (Expo Router)
+  (home)/         # Tabs principais
+  login.tsx
+  _layout.tsx
+lib/              # Lógica compartilhada
+  firebase/       # Configuração e clientes do Firebase
+context/          # React Context (Auth, etc.)
+components/       # Componentes reutilizáveis
+```
+
+## Como começar
+
+1. **Instalar dependências**
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. **Iniciar a app**
 
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. Rodar em Android, iOS ou Expo Go conforme o output do comando.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Requisitos
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- Node.js (recomendado >= 20)
+- Conta Firebase configurada (`google-services.json` na raiz)
+- Configuração em `lib/firebase/config.ts` com as credenciais do projeto
 
-## Get a fresh project
+## Scripts
 
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+| Comando              | Descrição               |
+|----------------------|-------------------------|
+| `npm start`          | Inicia o servidor Expo  |
+| `npm run android`    | Executa no Android      |
+| `npm run ios`        | Executa no iOS          |
+| `npm run web`        | Executa na web          |
+| `npm run lint`       | Executa ESLint          |
