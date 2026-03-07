@@ -14,11 +14,11 @@
       },
       "oauth_client": [
         {
-          "client_id": "441923672949-kvb9s0p48ooi8jkrhsfj0ldqsp7ohati.apps.googleusercontent.com",
+          "client_id": "441923672949-ogqk6ekngmfm5bbmb20f7c4ht64ojlsv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.nova.moneycontrol",
-            "certificate_hash": "8b3ef8b1bcd24afb18eb9c1b0fb9a1a884fd20e0"
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
           }
         },
         {
