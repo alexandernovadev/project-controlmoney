@@ -40,6 +40,17 @@ export function formatAmountForDisplay(raw: string): string {
 }
 
 /**
+ * Formats a number for display (e.g. in lists, totals).
+ * Uses en-US locale with 0-2 decimal places.
+ */
+export function formatAmountNumber(amount: number): string {
+  return amount.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+}
+
+/**
  * Parses display string (with thousand separators) back to raw numeric string.
  * Handles: "197.000", "1.290.000,5", "197.000.5"
  */

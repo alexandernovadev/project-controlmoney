@@ -14,14 +14,8 @@ import {
 } from '@/lib/firebase/transactions';
 import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
+import { formatAmountNumber } from '@/lib/utils/format-amount';
 import { formatDateShort } from '@/lib/utils/format-date';
-
-function formatAmount(amount: number): string {
-  return amount.toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
-}
 
 type ExpenseCardProps = {
   item: Transaction;
@@ -73,7 +67,7 @@ function ExpenseCard({
         </View>
         <View style={cardStyles.right}>
           <Text style={[cardStyles.amount, { color: Colors.error }]}>
-            -${formatAmount(item.amount)}
+            -${formatAmountNumber(item.amount)}
           </Text>
           <MaterialIcons
             name={isExpanded ? 'expand-less' : 'expand-more'}
@@ -104,7 +98,7 @@ function ExpenseCard({
             <View style={cardStyles.detailRow}>
               <Text style={cardStyles.detailLabel}>Precio/u</Text>
               <Text style={cardStyles.detailValue}>
-                {[formatAmount(item.unitPrice), item.unit ?? null]
+                {[formatAmountNumber(item.unitPrice), item.unit ?? null]
                   .filter(Boolean)
                   .join(' ')}
               </Text>
@@ -315,7 +309,7 @@ export default function ExpensesScreen() {
             <View style={[headerStyles.card, { backgroundColor: Colors.errorMuted }]}>
               <Text style={headerStyles.label}>Total</Text>
               <Text style={[headerStyles.total, { color: Colors.error }]}>
-                ${formatAmount(total)}
+                ${formatAmountNumber(total)}
               </Text>
             </View>
           </View>

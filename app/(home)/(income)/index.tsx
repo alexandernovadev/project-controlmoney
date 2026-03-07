@@ -16,13 +16,7 @@ import { formatDateShort } from '@/lib/utils/format-date';
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
-
-function formatAmount(amount: number): string {
-  return amount.toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 2,
-  });
-}
+import { formatAmountNumber } from '@/lib/utils/format-amount';
 
 type IncomeCardProps = {
   item: Transaction;
@@ -56,7 +50,7 @@ function IncomeCard({ item, paymentMethodLabel, categoryLabel, onPress, onLongPr
           </Text>
         </View>
         <Text style={[cardStyles.amount, { color: Colors.success }]}>
-          +${formatAmount(item.amount)}
+          +${formatAmountNumber(item.amount)}
         </Text>
       </View>
     </Card>
@@ -181,7 +175,7 @@ export default function IncomeScreen() {
             <View style={[headerStyles.card, { backgroundColor: Colors.successMuted }]}>
               <Text style={headerStyles.label}>Total</Text>
               <Text style={[headerStyles.total, { color: Colors.success }]}>
-                ${formatAmount(total)}
+                ${formatAmountNumber(total)}
               </Text>
             </View>
           </View>

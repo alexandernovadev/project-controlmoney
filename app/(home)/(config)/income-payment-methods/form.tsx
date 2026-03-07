@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
@@ -38,10 +39,17 @@ const typeOptions: SelectOption[] = [
 
 export default function IncomePaymentMethodFormScreen() {
   const { user } = useAuth();
+  const navigation = useNavigation();
   const params = useLocalSearchParams<{ id?: string }>();
   const insets = useSafeAreaInsets();
   const id = params.id;
   const isEdit = !!id;
+
+  useEffect(() => {
+    navigation.setOptions({
+      title: isEdit ? 'Editar método' : 'Agregar método',
+    });
+  }, [navigation, isEdit]);
 
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -163,7 +171,7 @@ export default function IncomePaymentMethodFormScreen() {
           )}
         />
         <Button
-          title={isEdit ? 'Guardar' : 'Crear método'}
+          title={isEdit ? 'Editar método' : 'Agregar método'}
           onPress={handleSubmit(onSubmit)}
           loading={loading}
           fullWidth

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ScrollView, StyleSheet } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
@@ -41,10 +42,15 @@ function todayISO(): string {
 
 export default function IncomeFormScreen() {
   const { user } = useAuth();
+  const navigation = useNavigation();
   const params = useLocalSearchParams<{ id?: string }>();
   const insets = useSafeAreaInsets();
   const id = params.id;
   const isEdit = !!id;
+
+  useEffect(() => {
+    navigation.setOptions({ title: isEdit ? 'Edit income' : 'Add income' });
+  }, [navigation, isEdit]);
 
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
@@ -235,7 +241,7 @@ export default function IncomeFormScreen() {
           )}
         />
         <Button
-          title={isEdit ? 'Save' : 'Add income'}
+          title={isEdit ? 'Edit income' : 'Add income'}
           onPress={handleSubmit(onSubmit)}
           loading={loading}
           fullWidth
