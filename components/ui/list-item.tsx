@@ -9,6 +9,7 @@ export type ListItemProps = ViewProps & {
   amountType?: 'income' | 'expense';
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
+  compact?: boolean;
   onPress?: () => void;
   onLongPress?: () => void;
 };
@@ -20,12 +21,14 @@ export function ListItem({
   amountType,
   leftIcon,
   rightIcon,
+  compact,
   onPress,
   onLongPress,
   style,
   ...props
 }: ListItemProps) {
   const amountColor = amountType === 'income' ? Colors.success : amountType === 'expense' ? Colors.error : Colors.text;
+  const rowStyle = compact ? [styles.row, styles.rowCompact] : styles.row;
 
   const content = (
     <>
@@ -52,7 +55,7 @@ export function ListItem({
       <Pressable
         onPress={onPress}
         onLongPress={onLongPress}
-        style={({ pressed }) => [styles.row, pressed && styles.pressed, style]}
+        style={({ pressed }) => [rowStyle, pressed && styles.pressed, style]}
         {...props}>
         {content}
       </Pressable>
@@ -60,7 +63,7 @@ export function ListItem({
   }
 
   return (
-    <View style={[styles.row, style]} {...props}>
+    <View style={[rowStyle, style]} {...props}>
       {content}
     </View>
   );
@@ -71,6 +74,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+  },
+  rowCompact: {
+    paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
   },
   pressed: {

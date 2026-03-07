@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { Alert, FlatList } from 'react-native';
+import { Alert, FlatList, Text, View } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,8 +11,8 @@ import {
 } from '@/lib/firebase/income-payment-methods';
 import type { IncomePaymentMethod } from '@/lib/models';
 import { ListPageLayout } from '@/components/layout/list-page-layout';
-import { ListItem } from '@/components/ui/list-item';
-import { Divider } from '@/components/ui/divider';
+import { Card } from '@/components/ui/card';
+import { Colors, FontSizes, Spacing } from '@/lib/theme';
 
 export default function IncomePaymentMethodsScreen() {
   const { user } = useAuth();
@@ -81,17 +81,61 @@ export default function IncomePaymentMethodsScreen() {
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
-        ItemSeparatorComponent={() => <Divider />}
+        contentContainerStyle={{
+          paddingHorizontal: Spacing.md,
+          paddingBottom: insets.bottom + 80,
+          gap: Spacing.sm,
+        }}
         renderItem={({ item }) => (
-          <ListItem
-            title={item.label}
-            subtitle={item.type === 'cash' ? 'Efectivo' : 'Digital'}
+          <Card
             onPress={() => handleEdit(item.id)}
             onLongPress={() => showMenu(item)}
-          />
+            padding="sm"
+            style={{
+              borderLeftWidth: 4,
+              borderLeftColor: Colors.accent,
+            }}
+          >
+            <View style={styles.row}>
+              <View style={styles.content}>
+                <Text style={styles.title} numberOfLines={1}>
+                  {item.label}
+                </Text>
+                <Text style={styles.subtitle} numberOfLines={1}>
+                  {item.type === 'cash' ? 'Efectivo' : 'Digital'}
+                  {item.value ? ` · ${item.value}` : ''}
+                </Text>
+              </View>
+              <MaterialIcons
+                name="chevron-right"
+                size={24}
+                color={Colors.textSecondary}
+              />
+            </View>
+          </Card>
         )}
       />
     </ListPageLayout>
   );
 }
+
+const styles = {
+  row: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+  },
+  content: {
+    flex: 1,
+    minWidth: 0,
+  },
+  title: {
+    fontSize: FontSizes.body,
+    fontWeight: '600' as const,
+    color: Colors.text,
+  },
+  subtitle: {
+    fontSize: FontSizes.bodySm,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+};

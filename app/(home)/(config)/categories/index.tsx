@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { Alert, FlatList } from 'react-native';
+import { Alert, FlatList, Text, View } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -11,9 +11,8 @@ import {
 } from '@/lib/firebase/categories';
 import type { Category } from '@/lib/models';
 import { ListPageLayout } from '@/components/layout/list-page-layout';
-import { ListItem } from '@/components/ui/list-item';
-import { Divider } from '@/components/ui/divider';
-import { Colors } from '@/lib/theme';
+import { Card } from '@/components/ui/card';
+import { Colors, FontSizes, Spacing } from '@/lib/theme';
 
 export default function CategoriesScreen() {
   const { user } = useAuth();
@@ -80,27 +79,76 @@ export default function CategoriesScreen() {
       <FlatList
         data={filtered}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
-        ItemSeparatorComponent={Divider}
+        contentContainerStyle={{
+          paddingHorizontal: Spacing.md,
+          paddingBottom: insets.bottom + 80,
+          gap: Spacing.sm,
+        }}
         renderItem={({ item }) => (
-          <ListItem
-            title={item.name}
-            subtitle={item.type === 'income' ? 'Ingreso' : 'Gasto'}
-            leftIcon={
-              item.color ? (
-                <MaterialIcons
-                  name="circle"
-                  size={12}
-                  color={item.color}
-                  style={{ marginRight: 4 }}
-                />
-              ) : undefined
-            }
+          <Card
             onPress={() => handleEdit(item.id)}
             onLongPress={() => showMenu(item)}
-          />
+            padding="sm"
+            style={{
+              borderLeftWidth: 4,
+              borderLeftColor:
+                item.color ??
+                (item.type === 'income' ? Colors.success : Colors.error),
+            }}
+          >
+            <View style={styles.row}>
+              {item.color ? (
+                <View
+                  style={[
+                    styles.colorDot,
+                    { backgroundColor: item.color },
+                  ]}
+                />
+              ) : null}
+              <View style={styles.content}>
+                <Text style={styles.title} numberOfLines={1}>
+                  {item.name}
+                </Text>
+                <Text style={styles.subtitle} numberOfLines={1}>
+                  {item.type === 'income' ? 'Ingreso' : 'Gasto'}
+                </Text>
+              </View>
+              <MaterialIcons
+                name="chevron-right"
+                size={24}
+                color={Colors.textSecondary}
+              />
+            </View>
+          </Card>
         )}
       />
     </ListPageLayout>
   );
 }
+
+const styles = {
+  row: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+  },
+  colorDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: Spacing.sm,
+  },
+  content: {
+    flex: 1,
+    minWidth: 0,
+  },
+  title: {
+    fontSize: FontSizes.body,
+    fontWeight: '600' as const,
+    color: Colors.text,
+  },
+  subtitle: {
+    fontSize: FontSizes.bodySm,
+    color: Colors.textSecondary,
+    marginTop: 2,
+  },
+};
