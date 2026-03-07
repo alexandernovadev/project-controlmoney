@@ -34,7 +34,7 @@ export default function LoginScreen() {
       } else {
         await createUserWithEmailAndPassword(auth, email, password);
       }
-      router.replace('/(tabs)');
+      router.replace('/(home)');
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Error en la autenticación.');
@@ -55,7 +55,7 @@ export default function LoginScreen() {
       if (response.data && response.data.idToken) {
         const googleCredential = GoogleAuthProvider.credential(response.data.idToken);
         await signInWithCredential(auth, googleCredential);
-        router.replace('/(tabs)');
+        router.replace('/(home)');
       } else {
         throw new Error('No se pudo obtener el idToken de Google.');
       }

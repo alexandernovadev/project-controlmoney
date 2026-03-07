@@ -36,7 +36,7 @@ function RootLayoutNav() {
       router.replace('/login');
     } else if (user && inLoginScreen) {
       // Redirigir a la app si ya está autenticado
-      router.replace('/(tabs)');
+      router.replace('/(home)');
     }
   }, [user, isLoading, segments]);
 
@@ -52,7 +52,7 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="login" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(home)" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
       </Stack>
       <StatusBar hidden />
