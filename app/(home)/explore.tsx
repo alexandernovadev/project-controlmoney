@@ -1,6 +1,7 @@
 import { Image } from 'expo-image';
 import { Platform, StyleSheet, Button } from 'react-native';
 import { auth } from '@/lib/firebase';
+import { Colors } from '@/lib/theme';
 
 import { Collapsible } from '@/components/ui/collapsible';
 import { ExternalLink } from '@/components/external-link';
@@ -13,11 +14,11 @@ import { Fonts } from '@/constants/theme';
 export default function TabTwoScreen() {
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
+      headerBackgroundColor={Colors.backgroundSecondary}
       headerImage={
         <IconSymbol
           size={310}
-          color="#808080"
+          color={Colors.textMuted}
           name="chevron.left.forwardslash.chevron.right"
           style={styles.headerImage}
         />
@@ -31,7 +32,7 @@ export default function TabTwoScreen() {
           Explore
         </ThemedText>
       </ThemedView>
-      <Button title="Cerrar Sesión" onPress={() => auth.signOut()} color="#ff3b30" />
+      <Button title="Cerrar Sesión" onPress={() => auth.signOut()} color={Colors.error} />
       <ThemedText>This app includes example code to help you get started.</ThemedText>
       <Collapsible title="File-based routing">
         <ThemedText>
@@ -102,7 +103,7 @@ export default function TabTwoScreen() {
 
 const styles = StyleSheet.create({
   headerImage: {
-    color: '#808080',
+    color: Colors.textMuted,
     bottom: -90,
     left: -35,
     position: 'absolute',

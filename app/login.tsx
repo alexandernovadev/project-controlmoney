@@ -3,9 +3,10 @@ import { StyleSheet, View, TextInput, Button, Text, TouchableOpacity, KeyboardAv
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { auth } from '@/lib/firebase';
+import { Colors } from '@/lib/theme';
 import { useRouter } from 'expo-router';
 
-// Configura Google Sign-in usando el webClientId de tu google-services.json
+// Configure Google Sign-in using webClientId from google-services.json
 GoogleSignin.configure({
   webClientId: '441923672949-01lt4oa6399n6bes5l2cjhjkimjefjhb.apps.googleusercontent.com',
 });
@@ -47,11 +48,11 @@ export default function LoginScreen() {
     setLoading(true);
     setError('');
     try {
-      // Revisa que los servicios de Google Play estén disponibles en Android
+      // Check that Google Play services are available on Android
       await GoogleSignin.hasPlayServices();
       const response = await GoogleSignin.signIn();
       
-      // Asegurarse de que tenemos un idToken
+      // Ensure we have an idToken
       if (response.data && response.data.idToken) {
         const googleCredential = GoogleAuthProvider.credential(response.data.idToken);
         await signInWithCredential(auth, googleCredential);
@@ -80,6 +81,7 @@ export default function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Correo Electrónico"
+          placeholderTextColor={Colors.textMuted}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -89,13 +91,14 @@ export default function LoginScreen() {
         <TextInput
           style={styles.input}
           placeholder="Contraseña"
+          placeholderTextColor={Colors.textMuted}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
         
         {loading ? (
-          <ActivityIndicator size="large" color="#0000ff" style={{ marginVertical: 20 }} />
+          <ActivityIndicator size="large" color={Colors.accent} style={{ marginVertical: 20 }} />
         ) : (
           <View style={styles.buttonContainer}>
             <View style={{ marginBottom: 10 }}>
@@ -103,7 +106,7 @@ export default function LoginScreen() {
             </View>
             
             <View style={{ alignItems: 'center', marginVertical: 10 }}>
-              <Text style={{ color: '#666', marginBottom: 10 }}>O también</Text>
+              <Text style={{ color: Colors.textSecondary, marginBottom: 10 }}>O también</Text>
               <GoogleSigninButton
                 size={GoogleSigninButton.Size.Wide}
                 color={GoogleSigninButton.Color.Dark}
@@ -131,7 +134,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: Colors.background,
   },
   formContainer: {
     padding: 20,
@@ -144,15 +147,17 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
+    color: Colors.text,
   },
   input: {
     height: 50,
-    borderColor: '#ccc',
+    borderColor: Colors.border,
     borderWidth: 1,
     borderRadius: 8,
     paddingHorizontal: 15,
     marginBottom: 15,
-    backgroundColor: '#fafafa',
+    backgroundColor: Colors.inputBackground,
+    color: Colors.text,
   },
   buttonContainer: {
     marginVertical: 10,
@@ -164,10 +169,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   switchText: {
-    color: '#007BFF',
+    color: Colors.accent,
   },
   errorText: {
-    color: 'red',
+    color: Colors.error,
     marginBottom: 15,
     textAlign: 'center',
   },

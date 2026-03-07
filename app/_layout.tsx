@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import * as NavigationBar from 'expo-navigation-bar';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 import { Platform, View, ActivityIndicator } from 'react-native';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider, useAuth } from '../context/auth';
 
 export const unstable_settings = {
@@ -14,7 +13,6 @@ export const unstable_settings = {
 };
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
   const { user, isLoading } = useAuth();
   const segments = useSegments();
   const router = useRouter();
@@ -32,10 +30,10 @@ function RootLayoutNav() {
     const inLoginScreen = segments[0] === 'login';
     
     if (!user && !inLoginScreen) {
-      // Redirigir al login si no está autenticado
+      // Redirect to login if not authenticated
       router.replace('/login');
     } else if (user && inLoginScreen) {
-      // Redirigir a la app si ya está autenticado
+      // Redirect to app if already authenticated
       router.replace('/(home)');
     }
   }, [user, isLoading, segments]);
@@ -49,7 +47,7 @@ function RootLayoutNav() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DarkTheme}>
       <Stack>
         <Stack.Screen name="login" options={{ headerShown: false }} />
         <Stack.Screen name="(home)" options={{ headerShown: false }} />
