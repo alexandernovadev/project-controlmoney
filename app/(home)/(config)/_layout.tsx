@@ -1,15 +1,17 @@
+import { Colors, FontSizes } from '@/lib/theme';
 import { Stack } from 'expo-router';
 
 export default function ConfigLayout() {
   return (
     <Stack
       screenOptions={{
-        headerStyle: { backgroundColor: '#0D0D0F' },
-        headerTintColor: '#F5F5F7',
+        headerStyle: { backgroundColor: Colors.background },
+        headerTintColor: Colors.text,
+        headerTitleStyle: { fontSize: FontSizes.h3, fontWeight: '600' },
         headerShadowVisible: false,
       }}
     >
-      <Stack.Screen name="index" options={{ title: 'Configuración' }} />
+      <Stack.Screen name="index" options={{ title: 'Configuración', animation: 'fade' }} />
       <Stack.Screen
         name="categories/index"
         options={{ title: 'Categorías' }}
