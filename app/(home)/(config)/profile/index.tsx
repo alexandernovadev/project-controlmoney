@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
 import { useAuth } from '@/context/auth';
+import { auth } from '@/lib/firebase';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, Spacing, FontSizes } from '@/lib/theme';
@@ -8,11 +9,11 @@ import { Button, Card } from '@/components/ui';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function ProfileScreen() {
-  const { user, signOut } = useAuth();
+  const { user } = useAuth();
 
   const handleSignOut = async () => {
     try {
-      await signOut();
+      await auth.signOut();
     } catch (error) {
       console.error('Error signing out:', error);
     }
