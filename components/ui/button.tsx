@@ -8,6 +8,7 @@ import {
   type PressableProps,
   type ViewStyle,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { Colors, FontSizes } from '@/lib/theme';
 import { Spacing } from '@/lib/theme';
 
@@ -61,6 +62,7 @@ export function Button({
   leftIcon,
   rightIcon,
   style,
+  onPress,
   ...props
 }: ButtonProps) {
   const textColor = variantTextColors[variant];
@@ -71,9 +73,17 @@ export function Button({
   const fontSize =
     size === 'sm' ? FontSizes.bodySm : size === 'lg' ? FontSizes.bodyLg : FontSizes.body;
 
+  const handlePress: PressableProps['onPress'] = (e) => {
+    if (!isDisabled) {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+    onPress?.(e);
+  };
+
   return (
     <Pressable
       disabled={isDisabled}
+      onPress={handlePress}
       style={({ pressed }) => [
         styles.base,
         variantStyles[variant],
@@ -85,7 +95,8 @@ export function Button({
         },
         style as ViewStyle,
       ]}
-      {...props}>
+      {...props}
+    >
       {loading ? (
         <ActivityIndicator color={textColor} size="small" />
       ) : (
