@@ -1,5 +1,5 @@
 import { Stack } from 'expo-router';
-import { Colors, FontSizes } from '@/lib/theme';
+import { Colors, FontSizes, FontWeights } from '@/lib/theme';
 
 export default function ExpensesLayout() {
   return (
@@ -7,7 +7,7 @@ export default function ExpensesLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: Colors.background },
         headerTintColor: Colors.text,
-        headerTitleStyle: { fontSize: FontSizes.h3, fontWeight: '600' },
+        headerTitleStyle: { fontSize: FontSizes.h1, fontWeight: FontWeights.semibold },
         headerShadowVisible: false,
       }}
     >

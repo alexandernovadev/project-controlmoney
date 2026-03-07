@@ -3,7 +3,7 @@ import { StyleSheet, View, TextInput, Button, Text, TouchableOpacity, KeyboardAv
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
 import { GoogleSignin, GoogleSigninButton } from '@react-native-google-signin/google-signin';
 import { auth } from '@/lib/firebase';
-import { Colors } from '@/lib/theme';
+import { Colors, FontSizes, FontWeights } from '@/lib/theme';
 import { useRouter } from 'expo-router';
 
 // Configure Google Sign-in using webClientId from google-services.json
@@ -143,8 +143,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: FontSizes.h1,
+    fontWeight: FontWeights.semibold,
     marginBottom: 20,
     textAlign: 'center',
     color: Colors.text,

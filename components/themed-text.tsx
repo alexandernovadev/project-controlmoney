@@ -1,6 +1,6 @@
 import { StyleSheet, Text, type TextProps } from 'react-native';
 
-import { Colors, FontSizes } from '@/lib/theme';
+import { Colors, FontSizes, FontWeights } from '@/lib/theme';
 import { useThemeColor } from '@/hooks/use-theme-color';
 
 export type ThemedTextProps = TextProps & {
@@ -46,7 +46,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: FontSizes.h1,
-    fontWeight: 'bold',
+    fontWeight: FontWeights.semibold,
     lineHeight: 40,
   },
   subtitle: {
