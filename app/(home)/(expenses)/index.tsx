@@ -15,7 +15,7 @@ import {
 import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
-import { formatDateShort } from '@/lib/utils/format-date';
+import { formatDateShort, getMonthRange } from '@/lib/utils/format-date';
 
 type ExpenseCardProps = {
   item: Transaction;
@@ -229,7 +229,11 @@ export default function ExpensesScreen() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    return subscribeExpenseTransactions(user.uid, setTransactions);
+    const { start, end } = getMonthRange();
+    return subscribeExpenseTransactions(user.uid, setTransactions, {
+      startDate: start,
+      endDate: end,
+    });
   }, [user?.uid]);
 
   useEffect(() => {

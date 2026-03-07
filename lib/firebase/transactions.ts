@@ -133,20 +133,25 @@ export async function deleteTransaction(
   await deleteDoc(transactionRef(userId, transactionId));
 }
 
+export type SubscribeTransactionsOptions = {
+  startDate?: string;
+  endDate?: string;
+};
+
 export function subscribeIncomeTransactions(
   userId: string,
-  onData: (transactions: Transaction[]) => void
+  onData: (transactions: Transaction[]) => void,
+  options?: SubscribeTransactionsOptions
 ): Unsubscribe {
-  const q = query(
-    transactionsRef(userId),
-    orderBy('date', 'desc')
-  );
+  const constraints: ReturnType<typeof where>[] = [where('type', '==', 'income')];
+  if (options?.startDate) constraints.push(where('date', '>=', options.startDate));
+  if (options?.endDate) constraints.push(where('date', '<=', options.endDate));
+  constraints.push(orderBy('date', 'desc'));
+  const q = query(transactionsRef(userId), ...constraints);
   return onSnapshot(
     q,
     (snap) => {
-      const items = snap.docs
-        .map((d) => toTransaction(d.id, d.data()))
-        .filter((t) => t.type === 'income');
+      const items = snap.docs.map((d) => toTransaction(d.id, d.data()));
       onData(items);
     },
     (err) => {
@@ -157,18 +162,18 @@ export function subscribeIncomeTransactions(
 
 export function subscribeExpenseTransactions(
   userId: string,
-  onData: (transactions: Transaction[]) => void
+  onData: (transactions: Transaction[]) => void,
+  options?: SubscribeTransactionsOptions
 ): Unsubscribe {
-  const q = query(
-    transactionsRef(userId),
-    orderBy('date', 'desc')
-  );
+  const constraints: ReturnType<typeof where>[] = [where('type', '==', 'expense')];
+  if (options?.startDate) constraints.push(where('date', '>=', options.startDate));
+  if (options?.endDate) constraints.push(where('date', '<=', options.endDate));
+  constraints.push(orderBy('date', 'desc'));
+  const q = query(transactionsRef(userId), ...constraints);
   return onSnapshot(
     q,
     (snap) => {
-      const items = snap.docs
-        .map((d) => toTransaction(d.id, d.data()))
-        .filter((t) => t.type === 'expense');
+      const items = snap.docs.map((d) => toTransaction(d.id, d.data()));
       onData(items);
     },
     (err) => {

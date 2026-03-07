@@ -17,6 +17,7 @@ import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
+import { getMonthRange } from '@/lib/utils/format-date';
 
 type IncomeCardProps = {
   item: Transaction;
@@ -92,7 +93,11 @@ export default function IncomeScreen() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    return subscribeIncomeTransactions(user.uid, setTransactions);
+    const { start, end } = getMonthRange();
+    return subscribeIncomeTransactions(user.uid, setTransactions, {
+      startDate: start,
+      endDate: end,
+    });
   }, [user?.uid]);
 
   useEffect(() => {
