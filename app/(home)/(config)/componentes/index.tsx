@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { auth } from '@/lib/firebase';
 import { Colors, Spacing } from '@/lib/theme';
 import {
@@ -35,7 +36,8 @@ const SEARCHABLE_OPTIONS = [
   { label: 'Otros', value: 'other' },
 ];
 
-export default function ExploreScreen() {
+export default function ComponentesScreen() {
+  const insets = useSafeAreaInsets();
   const [inputValue, setInputValue] = useState('');
   const [amountValue, setAmountValue] = useState('');
   const [selectValue, setSelectValue] = useState<string | null>(null);
@@ -48,7 +50,7 @@ export default function ExploreScreen() {
   };
 
   return (
-    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.screen} contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + Spacing['2xl'] }]}>
       <ThemedText type="title" style={styles.pageTitle}>
         UI Components
       </ThemedText>
@@ -199,7 +201,6 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: Spacing.lg,
-    paddingBottom: Spacing['2xl'],
   },
   pageTitle: {
     marginBottom: Spacing.lg,

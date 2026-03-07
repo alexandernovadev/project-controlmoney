@@ -28,6 +28,10 @@ export default function ConfigLayout() {
         name="income-payment-methods/form"
         options={{ title: 'Método de pago', presentation: 'modal' }}
       />
+      <Stack.Screen
+        name="componentes/index"
+        options={{ title: 'Componentes' }}
+      />
     </Stack>
   );
 }

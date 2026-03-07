@@ -28,6 +28,16 @@ export default function ConfigScreen() {
         style={styles.listItem}
         onPress={() => router.push('/(home)/(config)/income-payment-methods')}
       />
+      <ListItem
+        title="Componentes"
+        subtitle="UI components, logout"
+        compact
+        leftIcon={
+          <MaterialIcons name="widgets" size={24} color={Colors.icon} />
+        }
+        style={styles.listItem}
+        onPress={() => router.push('/(home)/(config)/componentes')}
+      />
     </ThemedView>
   );
 }
