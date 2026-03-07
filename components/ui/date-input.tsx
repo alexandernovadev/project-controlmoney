@@ -13,7 +13,8 @@ export type DateInputProps = {
 
 function formatDisplay(isoDate: string): string {
   if (!isoDate) return '';
-  const d = new Date(isoDate);
+  // Se añade T12:00:00 para forzar el mediodía y evitar saltos de día por zona horaria
+  const d = new Date(isoDate.includes('T') ? isoDate : isoDate + 'T12:00:00');
   return d.toLocaleDateString('default', {
     day: 'numeric',
     month: 'short',
@@ -28,12 +29,16 @@ export function DateInput({
   error,
 }: DateInputProps) {
   const [show, setShow] = useState(false);
-  const dateValue = value ? new Date(value + 'T12:00:00') : new Date();
+  const dateValue = value ? new Date(value.includes('T') ? value : value + 'T12:00:00') : new Date();
 
   const handleChange = (_: unknown, selectedDate?: Date) => {
     if (Platform.OS === 'android') setShow(false);
     if (selectedDate) {
-      onChangeValue(selectedDate.toISOString().split('T')[0]);
+      // Extraemos la fecha local en formato YYYY-MM-DD sin usar toISOString para evitar el desfase
+      const year = selectedDate.getFullYear();
+      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(selectedDate.getDate()).padStart(2, '0');
+      onChangeValue(`${year}-${month}-${day}`);
     }
   };
 
