@@ -1,17 +1,17 @@
-import { useEffect, useState } from 'react';
-import { router } from 'expo-router';
-import { Alert, FlatList, Text, View } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, FlatList, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useAuth } from '@/context/auth';
-import {
-  subscribeCategories,
-  deleteCategory,
-} from '@/lib/firebase/categories';
-import type { Category } from '@/lib/models';
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
+import { useAuth } from '@/context/auth';
+import {
+  deleteCategory,
+  subscribeCategories,
+} from '@/lib/firebase/categories';
+import type { Category } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 
 export default function CategoriesScreen() {
@@ -27,8 +27,8 @@ export default function CategoriesScreen() {
 
   const filtered = search.trim()
     ? categories.filter((c) =>
-        c.name.toLowerCase().includes(search.toLowerCase())
-      )
+      c.name.toLowerCase().includes(search.toLowerCase())
+    )
     : categories;
 
   const handleAdd = () =>
@@ -73,7 +73,7 @@ export default function CategoriesScreen() {
       searchValue={search}
       onSearchChange={setSearch}
       searchPlaceholder="Buscar categorías..."
-      onFilterPress={() => {}}
+      onFilterPress={() => { }}
       onAddPress={handleAdd}
     >
       <FlatList
@@ -91,9 +91,7 @@ export default function CategoriesScreen() {
             padding="sm"
             style={{
               borderLeftWidth: 4,
-              borderLeftColor:
-                item.color ??
-                (item.type === 'income' ? Colors.success : Colors.error),
+
             }}
           >
             <View style={styles.row}>
@@ -109,7 +107,9 @@ export default function CategoriesScreen() {
                 <Text style={styles.title} numberOfLines={1}>
                   {item.name}
                 </Text>
-                <Text style={styles.subtitle} numberOfLines={1}>
+                <Text style={[styles.subtitle,
+                { color: item.type === 'income' ? Colors.success : Colors.error },
+                ]} numberOfLines={1}>
                   {item.type === 'income' ? 'Ingreso' : 'Gasto'}
                 </Text>
               </View>
