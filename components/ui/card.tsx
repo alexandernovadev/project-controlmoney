@@ -5,19 +5,21 @@ import { Colors, Spacing } from '@/lib/theme';
 export type CardProps = ViewProps & {
   children: ReactNode;
   onPress?: () => void;
+  onLongPress?: () => void;
   padding?: keyof typeof Spacing;
   elevated?: boolean;
 };
 
-export function Card({ children, onPress, padding = 'md', elevated, style, ...props }: CardProps) {
+export function Card({ children, onPress, onLongPress, padding = 'md', elevated, style, ...props }: CardProps) {
   const content = (
     <View style={[styles.content, { padding: Spacing[padding] }]}>{children}</View>
   );
 
-  if (onPress) {
+  if (onPress || onLongPress) {
     return (
       <Pressable
         onPress={onPress}
+        onLongPress={onLongPress}
         style={({ pressed }) => [
           styles.card,
           elevated && styles.elevated,

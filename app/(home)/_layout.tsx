@@ -28,6 +28,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="(income)"
+        options={{
+          title: 'Income',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="arrow.down.circle.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
         name="(config)"
         options={{
           title: 'Config',

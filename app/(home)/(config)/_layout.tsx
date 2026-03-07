@@ -7,7 +7,7 @@ export default function ConfigLayout() {
       screenOptions={{
         headerStyle: { backgroundColor: Colors.background },
         headerTintColor: Colors.text,
-        headerTitleStyle: { fontSize: FontSizes.h3, fontWeight: '600' },
+        headerTitleStyle: { fontSize: FontSizes.h1, fontWeight: '600' },
         headerShadowVisible: false,
       }}
     >

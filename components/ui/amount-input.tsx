@@ -1,7 +1,7 @@
 import React, { useCallback } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 import { Colors, Spacing, FontSizes } from '@/lib/theme';
-import { formatAmount } from '@/lib/utils/format-amount';
+import { formatAmountForDisplay, parseAmountFromDisplay } from '@/lib/utils/format-amount';
 
 export type AmountInputProps = {
   value: string;
@@ -20,15 +20,17 @@ export function AmountInput({
   error,
   currencySymbol = '$',
   maxDecimals = 2,
-  placeholder = '0.00',
+  placeholder = '0',
 }: AmountInputProps) {
   const handleChange = useCallback(
     (text: string) => {
-      const formatted = formatAmount(text, maxDecimals);
-      onChangeValue(formatted);
+      const raw = parseAmountFromDisplay(text, maxDecimals);
+      onChangeValue(raw);
     },
     [maxDecimals, onChangeValue]
   );
+
+  const displayValue = formatAmountForDisplay(value);
 
   return (
     <View style={styles.container}>
@@ -36,7 +38,7 @@ export function AmountInput({
       <View style={[styles.wrapper, error && styles.wrapperError]}>
         <Text style={[styles.symbol, !value && styles.symbolMuted]}>{currencySymbol}</Text>
         <TextInput
-          value={value}
+          value={displayValue}
           onChangeText={handleChange}
           placeholder={placeholder}
           placeholderTextColor={Colors.textMuted}

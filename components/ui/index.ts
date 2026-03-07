@@ -2,6 +2,7 @@ export { Button } from './button';
 export { Card } from './card';
 export { Input } from './input';
 export { AmountInput } from './amount-input';
+export { DateInput } from './date-input';
 export { Select } from './select';
 export { SelectModal, type SelectOption } from './select-modal';
 export { Badge } from './badge';
