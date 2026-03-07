@@ -10,6 +10,7 @@ export type ListItemProps = ViewProps & {
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
   onPress?: () => void;
+  onLongPress?: () => void;
 };
 
 export function ListItem({
@@ -20,6 +21,7 @@ export function ListItem({
   leftIcon,
   rightIcon,
   onPress,
+  onLongPress,
   style,
   ...props
 }: ListItemProps) {
@@ -45,10 +47,11 @@ export function ListItem({
     </>
   );
 
-  if (onPress) {
+  if (onPress || onLongPress) {
     return (
       <Pressable
         onPress={onPress}
+        onLongPress={onLongPress}
         style={({ pressed }) => [styles.row, pressed && styles.pressed, style]}
         {...props}>
         {content}

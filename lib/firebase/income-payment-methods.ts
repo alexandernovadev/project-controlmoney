@@ -3,62 +3,61 @@
  * Path: users/{userId}/incomePaymentMethods/{methodId}
  */
 
-import {
-  collection,
-  doc,
-  addDoc,
-  getDoc,
-  getDocs,
-  updateDoc,
-  deleteDoc,
-  query,
-  orderBy,
-  onSnapshot,
-  type Unsubscribe,
-  type Timestamp,
-} from 'firebase/firestore';
-import { db } from './config';
 import type {
   IncomePaymentMethod,
   IncomePaymentMethodCreate,
-  IncomePaymentMethodUpdate,
   IncomePaymentMethodOption,
-} from '@/lib/models';
+  IncomePaymentMethodUpdate,
+} from "@/lib/models";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+  type Timestamp,
+  type Unsubscribe,
+} from "firebase/firestore";
+import { db } from "./config";
 
 const toMethod = (
   id: string,
-  data: Record<string, unknown>
+  data: Record<string, unknown>,
 ): IncomePaymentMethod => {
   const toDate = (v: unknown) =>
-    v && typeof v === 'object' && 'toDate' in v
+    v && typeof v === "object" && "toDate" in v
       ? (v as Timestamp).toDate().toISOString()
       : String(v);
   return {
     id,
-    label: String(data.label ?? ''),
-    value: String(data.value ?? ''),
-    type: (data.type as IncomePaymentMethod['type']) ?? 'digital',
-    userId: String(data.userId ?? ''),
+    label: String(data.label ?? ""),
+    value: String(data.value ?? ""),
+    type: (data.type as IncomePaymentMethod["type"]) ?? "digital",
+    userId: String(data.userId ?? ""),
     order: Number(data.order ?? 0),
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
   };
 };
 
+// Esto deberia ser mas generico , un user no le importa eso
+// per no importa esta es app demo
 export function incomePaymentMethodsRef(userId: string) {
-  return collection(db, 'users', userId, 'incomePaymentMethods');
+  return collection(db, "users", userId, "incomePaymentMethods");
 }
 
-export function incomePaymentMethodRef(
-  userId: string,
-  methodId: string
-) {
-  return doc(db, 'users', userId, 'incomePaymentMethods', methodId);
+export function incomePaymentMethodRef(userId: string, methodId: string) {
+  return doc(db, "users", userId, "incomePaymentMethods", methodId);
 }
 
 export async function createIncomePaymentMethod(
   userId: string,
-  data: IncomePaymentMethodCreate
+  data: IncomePaymentMethodCreate,
 ): Promise<IncomePaymentMethod> {
   const now = new Date().toISOString();
   const payload = {
@@ -69,13 +68,13 @@ export async function createIncomePaymentMethod(
   };
   const ref = await addDoc(incomePaymentMethodsRef(userId), payload);
   const created = await getIncomePaymentMethod(userId, ref.id);
-  if (!created) throw new Error('Failed to fetch created payment method');
+  if (!created) throw new Error("Failed to fetch created payment method");
   return created;
 }
 
 export async function getIncomePaymentMethod(
   userId: string,
-  methodId: string
+  methodId: string,
 ): Promise<IncomePaymentMethod | null> {
   const snap = await getDoc(incomePaymentMethodRef(userId, methodId));
   if (!snap.exists()) return null;
@@ -83,12 +82,9 @@ export async function getIncomePaymentMethod(
 }
 
 export async function getIncomePaymentMethods(
-  userId: string
+  userId: string,
 ): Promise<IncomePaymentMethod[]> {
-  const q = query(
-    incomePaymentMethodsRef(userId),
-    orderBy('order', 'asc')
-  );
+  const q = query(incomePaymentMethodsRef(userId), orderBy("order", "asc"));
   const snap = await getDocs(q);
   return snap.docs.map((d) => toMethod(d.id, d.data()));
 }
@@ -96,7 +92,7 @@ export async function getIncomePaymentMethods(
 export async function updateIncomePaymentMethod(
   userId: string,
   methodId: string,
-  data: IncomePaymentMethodUpdate
+  data: IncomePaymentMethodUpdate,
 ): Promise<void> {
   const ref = incomePaymentMethodRef(userId, methodId);
   await updateDoc(ref, {
@@ -107,19 +103,16 @@ export async function updateIncomePaymentMethod(
 
 export async function deleteIncomePaymentMethod(
   userId: string,
-  methodId: string
+  methodId: string,
 ): Promise<void> {
   await deleteDoc(incomePaymentMethodRef(userId, methodId));
 }
 
 export function subscribeIncomePaymentMethods(
   userId: string,
-  onData: (methods: IncomePaymentMethod[]) => void
+  onData: (methods: IncomePaymentMethod[]) => void,
 ): Unsubscribe {
-  const q = query(
-    incomePaymentMethodsRef(userId),
-    orderBy('order', 'asc')
-  );
+  const q = query(incomePaymentMethodsRef(userId), orderBy("order", "asc"));
   return onSnapshot(q, (snap) => {
     const items = snap.docs.map((d) => toMethod(d.id, d.data()));
     onData(items);
@@ -127,7 +120,7 @@ export function subscribeIncomePaymentMethods(
 }
 
 export function toIncomePaymentMethodOptions(
-  methods: IncomePaymentMethod[]
+  methods: IncomePaymentMethod[],
 ): IncomePaymentMethodOption[] {
   return methods.map((m) => ({ label: m.label, value: m.id }));
 }
