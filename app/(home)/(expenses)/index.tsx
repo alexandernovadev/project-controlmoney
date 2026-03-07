@@ -81,6 +81,16 @@ function ExpenseCard({
         {/* Row 1: Description */}
         <Text style={cardStyles.title}>
           {item.description || 'Expense'}
+          {(item.unit || item.unitPrice != null) ? (
+            <Text style={cardStyles.unitTextInline}>
+              {' ('}
+              {[
+                item.unitPrice != null ? `${formatAmountNumber(item.unitPrice)}` : null,
+                item.unit ? `${item.quantity != null && item.quantity !== 1 ? item.quantity + ' ' : ''}${item.unit}` : null
+              ].filter(Boolean).join('')}
+              {')'}
+            </Text>
+          ) : null}
         </Text>
 
         {/* Row 2: Category and Price */}
@@ -202,6 +212,11 @@ const cardStyles = {
     fontSize: FontSizes.body,
     fontWeight: '600' as const,
     color: Colors.text,
+  },
+  unitTextInline: {
+    fontSize: FontSizes.caption,
+    fontWeight: 'normal' as const,
+    color: Colors.textSecondary,
   },
   subtitle: {
     fontSize: FontSizes.caption,
