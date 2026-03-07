@@ -16,7 +16,7 @@ import {
 import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
-import { formatDateShort, MONTH_NAMES, getSubscriptionOptionsFromPeriod } from '@/lib/utils/format-date';
+import { formatDateShort, getSubscriptionOptionsFromPeriod, MONTH_NAMES } from '@/lib/utils/format-date';
 
 type ExpenseCardProps = {
   item: Transaction;
@@ -55,6 +55,7 @@ function ExpenseCard({
       onPress={onToggleExpand}
       onLongPress={onLongPress}
       padding="sm"
+      style={{ borderLeftWidth: 2, paddingHorizontal: 12, paddingVertical: 10 }}
     >
       <View style={cardStyles.container}>
         {/* Row 1: Description */}
@@ -273,7 +274,7 @@ export default function ExpensesScreen() {
   const insets = useSafeAreaInsets();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState('');
-  const [categories, setCategories] = useState<{id: string; name: string}[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -392,67 +393,67 @@ export default function ExpensesScreen() {
 
   return (
     <>
-    <ExpenseFilterModal
-      visible={filterVisible}
-      onClose={() => setFilterVisible(false)}
-      initialValues={filterValues}
-      onApply={setFilterValues}
-      categories={categories}
-    />
-    <ListPageLayout
-      searchValue={search}
-      onSearchChange={setSearch}
-      searchPlaceholder="Search expenses..."
-      onFilterPress={handleFilterPress}
-      onAddPress={handleAdd}
-    >
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id}
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          paddingHorizontal: Spacing.md,
-          paddingBottom: insets.bottom + 80,
-        }}
-        ListHeaderComponent={
-          <View style={headerStyles.wrap}>
-            <Text style={headerStyles.filterLabel}>{filterLabel}</Text>
-            <View style={[headerStyles.card, { backgroundColor: Colors.errorMuted, borderColor: 'rgba(255, 59, 48, 0.3)' }]}>
-              <View style={headerStyles.cardHeader}>
-                <MaterialIcons name="trending-down" size={16} color={Colors.error} />
-                <Text style={[headerStyles.label, { color: Colors.error }]}>Total Gastos</Text>
-              </View>
-              <Text style={[headerStyles.total, { color: Colors.error }]}>
-                ${formatAmountNumber(total)}
-              </Text>
-            </View>
-          </View>
-        }
-        ListEmptyComponent={
-          <View style={emptyStyles.wrap}>
-            <View style={[emptyStyles.iconWrap, { backgroundColor: Colors.errorMuted }]}>
-              <MaterialIcons name="trending-down" size={48} color={Colors.error} />
-            </View>
-            <Text style={emptyStyles.title}>No expenses yet</Text>
-            <Text style={emptyStyles.subtitle}>Tap + to add your first expense</Text>
-          </View>
-        }
-        renderItem={({ item }) => (
-          <View style={{ marginBottom: Spacing.sm }}>
-            <ExpenseCard
-              item={item}
-              categoryLabel={item.categoryId ? categoryMap[item.categoryId] : undefined}
-              isExpanded={expandedId === item.id}
-              onToggleExpand={() =>
-                setExpandedId((prev) => (prev === item.id ? null : item.id))
-              }
-              onEdit={() => handleEdit(item.id)}
-              onLongPress={() => showMenu(item)}
-            />
-          </View>
-        )}
+      <ExpenseFilterModal
+        visible={filterVisible}
+        onClose={() => setFilterVisible(false)}
+        initialValues={filterValues}
+        onApply={setFilterValues}
+        categories={categories}
       />
-    </ListPageLayout>
+      <ListPageLayout
+        searchValue={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Search expenses..."
+        onFilterPress={handleFilterPress}
+        onAddPress={handleAdd}
+      >
+        <FlatList
+          data={filtered}
+          keyExtractor={(item) => item.id}
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            paddingHorizontal: Spacing.md,
+            paddingBottom: insets.bottom + 80,
+          }}
+          ListHeaderComponent={
+            <View style={headerStyles.wrap}>
+              <Text style={headerStyles.filterLabel}>{filterLabel}</Text>
+              <View style={[headerStyles.card, { backgroundColor: Colors.errorMuted, borderColor: 'rgba(255, 59, 48, 0.3)' }]}>
+                <View style={headerStyles.cardHeader}>
+                  <MaterialIcons name="trending-down" size={16} color={Colors.error} />
+                  <Text style={[headerStyles.label, { color: Colors.error }]}>Total Gastos</Text>
+                </View>
+                <Text style={[headerStyles.total, { color: Colors.error }]}>
+                  ${formatAmountNumber(total)}
+                </Text>
+              </View>
+            </View>
+          }
+          ListEmptyComponent={
+            <View style={emptyStyles.wrap}>
+              <View style={[emptyStyles.iconWrap, { backgroundColor: Colors.errorMuted }]}>
+                <MaterialIcons name="trending-down" size={48} color={Colors.error} />
+              </View>
+              <Text style={emptyStyles.title}>No expenses yet</Text>
+              <Text style={emptyStyles.subtitle}>Tap + to add your first expense</Text>
+            </View>
+          }
+          renderItem={({ item }) => (
+            <View style={{ marginBottom: Spacing.sm }}>
+              <ExpenseCard
+                item={item}
+                categoryLabel={item.categoryId ? categoryMap[item.categoryId] : undefined}
+                isExpanded={expandedId === item.id}
+                onToggleExpand={() =>
+                  setExpandedId((prev) => (prev === item.id ? null : item.id))
+                }
+                onEdit={() => handleEdit(item.id)}
+                onLongPress={() => showMenu(item)}
+              />
+            </View>
+          )}
+        />
+      </ListPageLayout>
     </>
   );
 }

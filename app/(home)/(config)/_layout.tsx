@@ -29,6 +29,10 @@ export default function ConfigLayout() {
         options={{ title: 'Método de pago', presentation: 'modal' }}
       />
       <Stack.Screen
+        name="profile/index"
+        options={{ title: 'Perfil' }}
+      />
+      <Stack.Screen
         name="componentes/index"
         options={{ title: 'Componentes' }}
       />

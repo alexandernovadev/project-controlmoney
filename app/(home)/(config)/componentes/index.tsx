@@ -182,14 +182,16 @@ export default function ComponentesScreen() {
         />
       </Card>
 
-      {/* Logout */}
-      <Button
-        title="Cerrar Sesión"
-        variant="danger"
-        fullWidth
-        onPress={() => auth.signOut()}
-        style={styles.logoutBtn}
-      />
+      {/* Logout - now moved to Profile screen, keeping here only for dev testing */}
+      {__DEV__ && (
+        <Button
+          title="Cerrar Sesión (Dev)"
+          variant="danger"
+          fullWidth
+          onPress={() => auth.signOut()}
+          style={styles.logoutBtn}
+        />
+      )}
     </ScrollView>
   );
 }

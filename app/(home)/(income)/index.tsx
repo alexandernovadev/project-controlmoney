@@ -1,23 +1,23 @@
-import { useEffect, useState } from 'react';
-import { router } from 'expo-router';
-import { Alert, FlatList, Text, View } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { router } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { Alert, FlatList, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useAuth } from '@/context/auth';
-import {
-  subscribeIncomeTransactions,
-  deleteTransaction,
-} from '@/lib/firebase/transactions';
-import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
-import { getCategories } from '@/lib/firebase/categories';
-import type { Transaction } from '@/lib/models';
-import { formatDateShort, MONTH_NAMES, getSubscriptionOptionsFromPeriod } from '@/lib/utils/format-date';
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
 import { IncomeFilterModal, type IncomeFilterValues } from '@/components/ui/filter-modal';
+import { useAuth } from '@/context/auth';
+import { getCategories } from '@/lib/firebase/categories';
+import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
+import {
+  deleteTransaction,
+  subscribeIncomeTransactions,
+} from '@/lib/firebase/transactions';
+import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
+import { formatDateShort, getSubscriptionOptionsFromPeriod, MONTH_NAMES } from '@/lib/utils/format-date';
 
 type IncomeCardProps = {
   item: Transaction;
@@ -38,7 +38,7 @@ function IncomeCard({ item, paymentMethodLabel, categoryLabel, onPress, onLongPr
       onPress={onPress}
       onLongPress={onLongPress}
       padding="sm"
-      style={{ borderLeftWidth: 4, borderLeftColor: Colors.success, paddingHorizontal: 12, paddingVertical: 10 }}
+      style={{ borderLeftWidth: 2, paddingHorizontal: 12, paddingVertical: 10 }}
     >
       <View style={cardStyles.container}>
         {/* Row 1: Description */}

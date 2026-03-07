@@ -9,6 +9,16 @@ export default function ConfigScreen() {
   return (
     <ThemedView style={styles.container}>
       <ListItem
+        title="Perfil"
+        subtitle="Tu información y sesión"
+        compact
+        leftIcon={
+          <MaterialIcons name="person" size={24} color={Colors.icon} />
+        }
+        style={styles.listItem}
+        onPress={() => router.push('/(home)/(config)/profile')}
+      />
+      <ListItem
         title="Categorías"
         subtitle="Gastos e ingresos"
         compact
@@ -28,15 +38,28 @@ export default function ConfigScreen() {
         style={styles.listItem}
         onPress={() => router.push('/(home)/(config)/income-payment-methods')}
       />
+      {/* Components Button (Development Only) */}
+      {__DEV__ && (
+        <ListItem
+          title="Componentes"
+          subtitle="UI components gallery"
+          compact
+          leftIcon={
+            <MaterialIcons name="widgets" size={24} color={Colors.icon} />
+          }
+          style={styles.listItem}
+          onPress={() => router.push('/(home)/(config)/componentes')}
+        />
+      )}
       <ListItem
-        title="Componentes"
-        subtitle="UI components, logout"
+        title="Información del sistema"
+        subtitle="Versión, SO y detalles de la app"
         compact
         leftIcon={
-          <MaterialIcons name="widgets" size={24} color={Colors.icon} />
+          <MaterialIcons name="info" size={24} color={Colors.icon} />
         }
         style={styles.listItem}
-        onPress={() => router.push('/(home)/(config)/componentes')}
+        onPress={() => router.push('/(home)/(config)/system-info')}
       />
     </ThemedView>
   );
