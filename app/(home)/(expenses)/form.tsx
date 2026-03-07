@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { ScrollView, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { AmountInput } from '@/components/ui/amount-input';
 import { Select } from '@/components/ui/select';
 import type { SelectOption } from '@/components/ui/select-modal';
+import { Collapsible } from '@/components/ui/collapsible';
 import { Colors, Spacing } from '@/lib/theme';
 
 const schema = z.object({
@@ -29,6 +30,10 @@ const schema = z.object({
   description: z.string().min(1, 'Required'),
   categoryId: z.string().min(1, 'Required'),
   store: z.string().optional(),
+  storeAddress: z.string().optional(),
+  storeCountry: z.string().optional(),
+  storeLat: z.string().optional(),
+  storeLng: z.string().optional(),
   quantity: z
     .string()
     .min(1, 'Required')
@@ -72,6 +77,10 @@ export default function ExpenseFormScreen() {
       description: '',
       categoryId: '',
       store: '',
+      storeAddress: '',
+      storeCountry: '',
+      storeLat: '',
+      storeLng: '',
       quantity: '1',
       unit: '',
       unitPrice: '',
@@ -97,11 +106,20 @@ export default function ExpenseFormScreen() {
         const tx = await getTransaction(user.uid, id);
         if (cancelled) return;
         if (tx && tx.type === 'expense') {
+          const storeObj =
+            typeof tx.store === 'object' && tx.store != null ? tx.store : null;
           reset({
             amount: String(tx.amount),
             description: tx.description,
             categoryId: tx.categoryId ?? '',
-            store: typeof tx.store === 'string' ? tx.store : tx.store?.name ?? '',
+            store:
+              typeof tx.store === 'string'
+                ? tx.store
+                : storeObj?.name ?? '',
+            storeAddress: storeObj?.address ?? '',
+            storeCountry: storeObj?.country ?? '',
+            storeLat: storeObj?.lat != null ? String(storeObj.lat) : '',
+            storeLng: storeObj?.lng != null ? String(storeObj.lng) : '',
             quantity: tx.quantity != null ? String(tx.quantity) : '1',
             unit: tx.unit ?? '',
             unitPrice: tx.unitPrice != null ? String(tx.unitPrice) : '',
@@ -123,13 +141,36 @@ export default function ExpenseFormScreen() {
     if (!user?.uid) return;
     setLoading(true);
     try {
+      const storeName = values.store?.trim();
+      const storeAddr = values.storeAddress?.trim();
+      const storeCountryVal = values.storeCountry?.trim();
+      const latNum = values.storeLat ? parseFloat(values.storeLat) : NaN;
+      const lngNum = values.storeLng ? parseFloat(values.storeLng) : NaN;
+      const lat = !isNaN(latNum) ? latNum : undefined;
+      const lng = !isNaN(lngNum) ? lngNum : undefined;
+
+      let store: string | { name: string; address?: string; country?: string; lat?: number; lng?: number } | undefined;
+      if (storeName) {
+        if (storeAddr || storeCountryVal || lat != null || lng != null) {
+          store = {
+            name: storeName,
+            ...(storeAddr && { address: storeAddr }),
+            ...(storeCountryVal && { country: storeCountryVal }),
+            ...(lat != null && { lat }),
+            ...(lng != null && { lng }),
+          };
+        } else {
+          store = storeName;
+        }
+      }
+
       const payload = {
         userId: user.uid,
         type: 'expense' as const,
         amount: parseFloat(values.amount) || 0,
         description: values.description,
         categoryId: values.categoryId || undefined,
-        store: values.store || undefined,
+        store,
         quantity: Math.min(1000, Math.max(1, parseFloat(values.quantity) || 1)),
         unit: (values.unit || undefined) as Unit | undefined,
         unitPrice: values.unitPrice ? parseFloat(values.unitPrice) : undefined,
@@ -210,20 +251,40 @@ export default function ExpenseFormScreen() {
             />
           )}
         />
-        <Controller
-          control={control}
-          name="categoryId"
-          render={({ field: { onChange, value } }) => (
-            <Select
-              label="Category"
-              options={categoryOptions}
-              value={value || null}
-              onValueChange={(v) => onChange(v || '')}
-              placeholder="Select"
-              error={errors.categoryId?.message}
+        <View style={styles.rowCantidadCategoria}>
+          <View style={styles.cantidadField}>
+            <Controller
+              control={control}
+              name="quantity"
+              render={({ field: { onChange, value } }) => (
+                <Input
+                  label="Quantity"
+                  value={value}
+                  onChangeText={onChange}
+                  placeholder="1 - 1000"
+                  keyboardType="decimal-pad"
+                  error={errors.quantity?.message}
+                />
+              )}
             />
-          )}
-        />
+          </View>
+          <View style={styles.categoriaField}>
+            <Controller
+              control={control}
+              name="categoryId"
+              render={({ field: { onChange, value } }) => (
+                <Select
+                  label="Category"
+                  options={categoryOptions}
+                  value={value || null}
+                  onValueChange={(v) => onChange(v || '')}
+                  placeholder="Select"
+                  error={errors.categoryId?.message}
+                />
+              )}
+            />
+          </View>
+        </View>
         <Controller
           control={control}
           name="store"
@@ -236,45 +297,91 @@ export default function ExpenseFormScreen() {
             />
           )}
         />
-        <Controller
-          control={control}
-          name="quantity"
-          render={({ field: { onChange, value } }) => (
-            <Input
-              label="Quantity"
-              value={value}
-              onChangeText={onChange}
-              placeholder="1 - 1000"
-              keyboardType="decimal-pad"
-              error={errors.quantity?.message}
+        <View style={styles.collapsibleWrap}>
+          <Collapsible title="Store details (advanced)">
+          <Controller
+            control={control}
+            name="storeAddress"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="Address"
+                value={value}
+                onChangeText={onChange}
+                placeholder="Street, city..."
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="storeCountry"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="Country"
+                value={value}
+                onChangeText={onChange}
+                placeholder="e.g. Colombia"
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="storeLat"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="Latitude"
+                value={value}
+                onChangeText={onChange}
+                placeholder="e.g. 4.7110"
+                keyboardType="decimal-pad"
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="storeLng"
+            render={({ field: { onChange, value } }) => (
+              <Input
+                label="Longitude"
+                value={value}
+                onChangeText={onChange}
+                placeholder="e.g. -74.0721"
+                keyboardType="decimal-pad"
+              />
+            )}
+          />
+          </Collapsible>
+        </View>
+        <View style={styles.rowFields}>
+          <View style={styles.rowField}>
+            <Controller
+              control={control}
+              name="unit"
+              render={({ field: { onChange, value } }) => (
+                <Select
+                  label="Unit (optional)"
+                  options={unitOptions}
+                  value={value || null}
+                  onValueChange={(v) => onChange(v || '')}
+                  placeholder="Select"
+                />
+              )}
             />
-          )}
-        />
-        <Controller
-          control={control}
-          name="unit"
-          render={({ field: { onChange, value } }) => (
-            <Select
-              label="Unit (optional)"
-              options={unitOptions}
-              value={value || null}
-              onValueChange={(v) => onChange(v || '')}
-              placeholder="Select"
+          </View>
+          <View style={styles.rowField}>
+            <Controller
+              control={control}
+              name="unitPrice"
+              render={({ field: { onChange, value } }) => (
+                <AmountInput
+                  label="Unit price (optional)"
+                  value={value ?? ''}
+                  onChangeValue={onChange}
+                  placeholder="0"
+                />
+              )}
             />
-          )}
-        />
-        <Controller
-          control={control}
-          name="unitPrice"
-          render={({ field: { onChange, value } }) => (
-            <AmountInput
-              label="Unit price (optional)"
-              value={value ?? ''}
-              onChangeValue={onChange}
-              placeholder="0"
-            />
-          )}
-        />
+          </View>
+        </View>
         <Controller
           control={control}
           name="rating"
@@ -336,4 +443,24 @@ const styles = StyleSheet.create({
   },
   scroll: { flex: 1 },
   scrollContent: { padding: Spacing.lg },
+  collapsibleWrap: { marginBottom: Spacing.md },
+  rowCantidadCategoria: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  cantidadField: {
+    flex: 2,
+    minWidth: 60,
+  },
+  categoriaField: {
+    flex: 8,
+    minWidth: 0,
+  },
+  rowFields: {
+    flexDirection: 'row',
+    gap: Spacing.md,
+  },
+  rowField: {
+    flex: 1,
+  },
 });

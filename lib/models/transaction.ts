@@ -2,21 +2,22 @@
  * Transaction models
  */
 
-export type TransactionType = 'income' | 'expense';
+export type TransactionType = "income" | "expense";
 
 // Units of measure (expenses)
 export type Unit =
-  | 'unidad'
-  | 'kg'
-  | 'g'
-  | 'L'
-  | 'ml'
-  | 'lb'
-  | 'oz'
-  | 'caja'
-  | 'paquete'
-  | 'litro'
-  | 'otro';
+  | "unidad"
+  | "kg"
+  | "g"
+  | "L"
+  | "ml"
+  | "lb"
+  | "oz"
+  | "caja"
+  | "paquete"
+  | "litro"
+  | "tarjeta"
+  | "otro";
 
 // Store info (expenses, optional)
 export type StoreInfo = {
@@ -53,11 +54,14 @@ export type Transaction = {
   updatedAt: string;
 };
 
-export type TransactionCreate = Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'> & {
+export type TransactionCreate = Omit<
+  Transaction,
+  "id" | "createdAt" | "updatedAt"
+> & {
   createdAt?: string;
   updatedAt?: string;
 };
 
 export type TransactionUpdate = Partial<
-  Omit<Transaction, 'id' | 'userId' | 'createdAt'>
+  Omit<Transaction, "id" | "userId" | "createdAt">
 >;
