@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  TextInput,
-  View,
-  Text,
-  StyleSheet,
-  type TextInputProps,
-  type ViewStyle,
-} from 'react-native';
+import { TextInput, View, Text, StyleSheet, type TextInputProps, type ViewStyle } from 'react-native';
 import { Colors, Spacing, FontSizes } from '@/lib/theme';
 
 export type InputProps = TextInputProps & {
@@ -43,9 +36,9 @@ export function Input({
           placeholderTextColor={Colors.textMuted}
           style={[
             styles.input,
-            leftIcon && styles.inputWithLeftIcon,
-            rightIcon && styles.inputWithRightIcon,
-            style as ViewStyle,
+            leftIcon ? styles.inputWithLeftIcon : undefined,
+            rightIcon ? styles.inputWithRightIcon : undefined,
+            style,
           ]}
           {...props}
         />
