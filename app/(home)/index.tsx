@@ -1,17 +1,17 @@
-import { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, Text } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { Card } from '@/components/ui/card';
 import { useAuth } from '@/context/auth';
+import { getCategories } from '@/lib/firebase/categories';
+import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
+import { subscribeExpenseTransactions, subscribeIncomeTransactions } from '@/lib/firebase/transactions';
+import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
 import { getMonthRange } from '@/lib/utils/format-date';
-import { subscribeIncomeTransactions, subscribeExpenseTransactions } from '@/lib/firebase/transactions';
-import type { Transaction } from '@/lib/models';
-import { Card } from '@/components/ui/card';
-import { getCategories } from '@/lib/firebase/categories';
-import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
 
 // We'll reuse the Expense Filter Modal types for the generic period filter
 import { IncomeFilterModal, type IncomeFilterValues } from '@/components/ui/filter-modal';
@@ -260,46 +260,46 @@ export default function HomeScreen() {
           <View style={{ gap: Spacing.sm }}>
             {mostExpensive && (
               <Card style={styles.insightCard}>
-                <View style={styles.insightLeft}>
-                  <View style={[styles.insightIconWrap, { backgroundColor: Colors.errorMuted }]}>
-                    <MaterialIcons name="local-fire-department" size={18} color={Colors.error} />
+                <View style={styles.insightRow}>
+                  <View style={[styles.insightIconBg, { backgroundColor: Colors.errorMuted }]}>
+                    <MaterialIcons name="local-fire-department" size={16} color={Colors.error} />
                   </View>
-                  <Text style={styles.insightLabel}>Más caro</Text>
+                  <Text style={styles.insightDescText} numberOfLines={1}>{mostExpensive.description}</Text>
                 </View>
-                <View style={styles.insightInfo}>
-                  <Text style={styles.insightTitle} numberOfLines={2}>{mostExpensive.description}</Text>
+                <View style={styles.insightRow}>
+                  <Text style={styles.insightLabelText}>Más caro</Text>
+                  <Text style={styles.insightPriceText}>${formatAmountNumber(mostExpensive.amount)}</Text>
                 </View>
-                <Text style={styles.insightValue}>${formatAmountNumber(mostExpensive.amount)}</Text>
               </Card>
             )}
 
             {mostRepeated && (
               <Card style={styles.insightCard}>
-                <View style={styles.insightLeft}>
-                  <View style={[styles.insightIconWrap, { backgroundColor: Colors.warningMuted }]}>
-                    <MaterialIcons name="repeat" size={18} color={Colors.warning} />
+                <View style={styles.insightRow}>
+                  <View style={[styles.insightIconBg, { backgroundColor: Colors.warningMuted }]}>
+                    <MaterialIcons name="repeat" size={16} color={Colors.warning} />
                   </View>
-                  <Text style={styles.insightLabel}>{mostRepeated.count} veces</Text>
+                  <Text style={styles.insightDescText} numberOfLines={1}>{mostRepeated.name}</Text>
                 </View>
-                <View style={styles.insightInfo}>
-                  <Text style={styles.insightTitle} numberOfLines={2}>{mostRepeated.name}</Text>
+                <View style={styles.insightRow}>
+                  <Text style={styles.insightLabelText}>{mostRepeated.count} veces</Text>
+                  <Text style={styles.insightPriceText}>${formatAmountNumber(mostRepeated.total)}</Text>
                 </View>
-                <Text style={styles.insightValue}>${formatAmountNumber(mostRepeated.total)}</Text>
               </Card>
             )}
 
             {cheapest && (
               <Card style={styles.insightCard}>
-                <View style={styles.insightLeft}>
-                  <View style={[styles.insightIconWrap, { backgroundColor: Colors.successMuted }]}>
-                    <MaterialIcons name="arrow-downward" size={18} color={Colors.success} />
+                <View style={styles.insightRow}>
+                  <View style={[styles.insightIconBg, { backgroundColor: Colors.successMuted }]}>
+                    <MaterialIcons name="arrow-downward" size={16} color={Colors.success} />
                   </View>
-                  <Text style={styles.insightLabel}>Más barato</Text>
+                  <Text style={styles.insightDescText} numberOfLines={1}>{cheapest.description}</Text>
                 </View>
-                <View style={styles.insightInfo}>
-                  <Text style={styles.insightTitle} numberOfLines={2}>{cheapest.description}</Text>
+                <View style={styles.insightRow}>
+                  <Text style={styles.insightLabelText}>Más barato</Text>
+                  <Text style={styles.insightPriceText}>${formatAmountNumber(cheapest.amount)}</Text>
                 </View>
-                <Text style={styles.insightValue}>${formatAmountNumber(cheapest.amount)}</Text>
               </Card>
             )}
           </View>
@@ -481,41 +481,38 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   insightCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: Spacing.sm,
+    paddingVertical: 10,
+    paddingHorizontal: Spacing.md,
     backgroundColor: Colors.backgroundElevated,
+    gap: 4,
   },
-  insightLeft: {
-    width: 60,
+  insightRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginRight: Spacing.sm,
   },
-  insightIconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+  insightIconBg: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 4,
   },
-  insightLabel: {
-    fontSize: 10,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    textTransform: 'uppercase',
-  },
-  insightInfo: {
+  insightDescText: {
     flex: 1,
-    paddingRight: Spacing.sm,
-    justifyContent: 'center',
-  },
-  insightTitle: {
+    textAlign: 'right',
     fontSize: FontSizes.bodySm,
-    fontWeight: '600',
     color: Colors.text,
+    fontWeight: '500',
+    marginLeft: Spacing.sm,
   },
-  insightValue: {
+  insightLabelText: {
+    fontSize: FontSizes.caption,
+    color: Colors.textSecondary,
+    textTransform: 'uppercase',
+    fontWeight: '600',
+  },
+  insightPriceText: {
     fontSize: FontSizes.body,
     fontWeight: '700',
     color: Colors.text,
