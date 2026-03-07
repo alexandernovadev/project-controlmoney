@@ -71,9 +71,10 @@ function ExpenseCard({
               {' ('}
               {[
                 item.unitPrice != null ? `${formatAmountNumber(item.unitPrice)}` : null,
-                item.unit ? `${item.quantity != null && item.quantity !== 1 ? item.quantity + ' ' : ''}${item.unit}` : null
-              ].filter(Boolean).join(', ')}
+                item.unit ? `${item.unit}` : null
+              ].filter(Boolean).join('')}
               {')'}
+
             </Text>
           ) : null}
         </Text>
@@ -116,7 +117,15 @@ function ExpenseCard({
           {item.quantity != null && (
             <View style={cardStyles.detailRow}>
               <Text style={cardStyles.detailLabel}>Cantidad</Text>
-              <Text style={cardStyles.detailValue}>{String(item.quantity)}</Text>
+              <Text style={cardStyles.detailValue}>
+                {String(item.quantity)}
+                {item.quantity > 1 && (
+                  <Text style={{ fontSize: FontSizes.caption, color: Colors.textSecondary }}>
+                    {' '}
+                    (c/u {formatAmountNumber(item.amount / item.quantity)})
+                  </Text>
+                )}
+              </Text>
             </View>
           )}
 
@@ -128,7 +137,7 @@ function ExpenseCard({
           )}
           {item.unitPrice != null && (
             <View style={cardStyles.detailRow}>
-              <Text style={cardStyles.detailLabel}>Precio/u</Text>
+              <Text style={cardStyles.detailLabel}>Valor</Text>
               <Text style={cardStyles.detailValue}>
                 {[formatAmountNumber(item.unitPrice), item.unit ?? null]
                   .filter(Boolean)

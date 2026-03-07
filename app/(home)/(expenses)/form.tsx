@@ -394,10 +394,11 @@ export default function ExpenseFormScreen() {
               name="unitPrice"
               render={({ field: { onChange, value } }) => (
                 <AmountInput
-                  label="Unit price (optional)"
+                  label="Valor (opcional)"
                   value={value ?? ''}
                   onChangeValue={onChange}
                   placeholder="0"
+                  currencySymbol=""
                 />
               )}
             />
