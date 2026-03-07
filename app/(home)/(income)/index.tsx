@@ -12,34 +12,12 @@ import {
 import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
 import { getCategories } from '@/lib/firebase/categories';
 import type { Transaction } from '@/lib/models';
-import { formatDateShort } from '@/lib/utils/format-date';
+import { formatDateShort, MONTH_NAMES, getSubscriptionOptionsFromPeriod } from '@/lib/utils/format-date';
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
 import { IncomeFilterModal, type IncomeFilterValues } from '@/components/ui/filter-modal';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
-import { getMonthRange } from '@/lib/utils/format-date';
-
-const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-
-function getSubscriptionOptionsFromPeriod(
-  period: IncomeFilterValues['period']
-): { startDate: string; endDate: string } | undefined {
-  if (period === 'all') return undefined;
-  if (period === 'current') {
-    const { start, end } = getMonthRange();
-    return { startDate: start, endDate: end };
-  }
-  if (period === 'last') {
-    const now = new Date();
-    const prev = new Date(now.getFullYear(), now.getMonth() - 1);
-    const { start, end } = getMonthRange(prev.getFullYear(), prev.getMonth());
-    return { startDate: start, endDate: end };
-  }
-  const from = new Date(period.from).toISOString();
-  const to = new Date(period.to + 'T23:59:59.999').toISOString();
-  return { startDate: from, endDate: to };
-}
 
 type IncomeCardProps = {
   item: Transaction;

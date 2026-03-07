@@ -37,3 +37,26 @@ export function todayLocalISO(): string {
   const day = String(d.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+export const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+export type FilterPeriod = 'current' | 'last' | 'all' | { from: string; to: string };
+
+export function getSubscriptionOptionsFromPeriod(
+  period: FilterPeriod
+): { startDate: string; endDate: string } | undefined {
+  if (period === 'all') return undefined;
+  if (period === 'current') {
+    const { start, end } = getMonthRange();
+    return { startDate: start, endDate: end };
+  }
+  if (period === 'last') {
+    const now = new Date();
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1);
+    const { start, end } = getMonthRange(prev.getFullYear(), prev.getMonth());
+    return { startDate: start, endDate: end };
+  }
+  const from = new Date(period.from).toISOString();
+  const to = new Date(period.to + 'T23:59:59.999').toISOString();
+  return { startDate: from, endDate: to };
+}

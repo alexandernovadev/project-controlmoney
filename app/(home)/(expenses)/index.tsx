@@ -16,28 +16,7 @@ import {
 import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
-import { formatDateShort, getMonthRange } from '@/lib/utils/format-date';
-
-const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-
-function getSubscriptionOptionsFromPeriod(
-  period: ExpenseFilterValues['period']
-): { startDate: string; endDate: string } | undefined {
-  if (period === 'all') return undefined;
-  if (period === 'current') {
-    const { start, end } = getMonthRange();
-    return { startDate: start, endDate: end };
-  }
-  if (period === 'last') {
-    const now = new Date();
-    const prev = new Date(now.getFullYear(), now.getMonth() - 1);
-    const { start, end } = getMonthRange(prev.getFullYear(), prev.getMonth());
-    return { startDate: start, endDate: end };
-  }
-  const from = new Date(period.from).toISOString();
-  const to = new Date(period.to + 'T23:59:59.999').toISOString();
-  return { startDate: from, endDate: to };
-}
+import { formatDateShort, MONTH_NAMES, getSubscriptionOptionsFromPeriod } from '@/lib/utils/format-date';
 
 type ExpenseCardProps = {
   item: Transaction;
@@ -76,7 +55,6 @@ function ExpenseCard({
       onPress={onToggleExpand}
       onLongPress={onLongPress}
       padding="sm"
-      style={{ borderLeftWidth: 4, borderLeftColor: Colors.error, paddingHorizontal: 12, paddingVertical: 10 }}
     >
       <View style={cardStyles.container}>
         {/* Row 1: Description */}

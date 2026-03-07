@@ -10,7 +10,7 @@ import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
 import { subscribeExpenseTransactions, subscribeIncomeTransactions } from '@/lib/firebase/transactions';
 import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
-import { MONTH_NAMES, getSubscriptionOptionsFromPeriod } from '@/lib/utils/filter-utils';
+import { MONTH_NAMES, getSubscriptionOptionsFromPeriod } from '@/lib/utils/format-date';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
 import { formatDateShort } from '@/lib/utils/format-date';
 
