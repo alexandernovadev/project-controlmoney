@@ -1,4 +1,5 @@
 {
+  "eslint.runtime": "node",
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
