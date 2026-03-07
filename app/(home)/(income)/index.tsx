@@ -89,6 +89,9 @@ export default function IncomeScreen() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState('');
   const [paymentMethodMap, setPaymentMethodMap] = useState<Record<string, string>>({});
+  const [paymentMethodTypeMap, setPaymentMethodTypeMap] = useState<
+    Record<string, 'cash' | 'digital'>
+  >({});
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -107,8 +110,13 @@ export default function IncomeScreen() {
       getCategories(user.uid),
     ]).then(([methods, categories]) => {
       const pmMap: Record<string, string> = {};
-      methods.forEach((m) => { pmMap[m.id] = m.label; });
+      const pmTypeMap: Record<string, 'cash' | 'digital'> = {};
+      methods.forEach((m) => {
+        pmMap[m.id] = m.label;
+        pmTypeMap[m.id] = m.type;
+      });
       setPaymentMethodMap(pmMap);
+      setPaymentMethodTypeMap(pmTypeMap);
       const catMap: Record<string, string> = {};
       categories.forEach((c) => { catMap[c.id] = c.name; });
       setCategoryMap(catMap);
@@ -124,7 +132,11 @@ export default function IncomeScreen() {
       )
     : transactions;
 
-  const total = filtered.reduce((sum, t) => sum + t.amount, 0);
+  const totalCash = filtered.reduce((sum, t) => {
+    if (!t.paymentMethodId) return sum;
+    return paymentMethodTypeMap[t.paymentMethodId] === 'cash' ? sum + t.amount : sum;
+  }, 0);
+  const totalDigital = filtered.reduce((sum, t) => sum + t.amount, 0) - totalCash;
 
   const handleAdd = () => router.push('/(home)/(income)/form');
   const handleEdit = (id: string) =>
@@ -177,11 +189,19 @@ export default function IncomeScreen() {
         }}
         ListHeaderComponent={
           <View style={headerStyles.wrap}>
-            <View style={[headerStyles.card, { backgroundColor: Colors.successMuted }]}>
-              <Text style={headerStyles.label}>Total</Text>
-              <Text style={[headerStyles.total, { color: Colors.success }]}>
-                ${formatAmountNumber(total)}
-              </Text>
+            <View style={headerStyles.row}>
+              <View style={[headerStyles.card, headerStyles.cardHalf, { backgroundColor: Colors.successMuted }]}>
+                <Text style={headerStyles.label}>Cash</Text>
+                <Text style={[headerStyles.total, { color: Colors.success }]}>
+                  ${formatAmountNumber(totalCash)}
+                </Text>
+              </View>
+              <View style={[headerStyles.card, headerStyles.cardHalf, { backgroundColor: Colors.successMuted }]}>
+                <Text style={headerStyles.label}>Digital</Text>
+                <Text style={[headerStyles.total, { color: Colors.success }]}>
+                  ${formatAmountNumber(totalDigital)}
+                </Text>
+              </View>
             </View>
           </View>
         }
@@ -238,11 +258,18 @@ const emptyStyles = {
 
 const headerStyles = {
   wrap: { marginBottom: Spacing.md },
+  row: {
+    flexDirection: 'row' as const,
+    gap: Spacing.sm,
+  },
   card: {
     borderRadius: 16,
     padding: Spacing.lg,
     borderWidth: 1,
     borderColor: 'rgba(52, 199, 89, 0.3)',
+  },
+  cardHalf: {
+    flex: 1,
   },
   label: {
     fontSize: FontSizes.caption,
