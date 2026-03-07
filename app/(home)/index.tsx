@@ -10,32 +10,12 @@ import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
 import { subscribeExpenseTransactions, subscribeIncomeTransactions } from '@/lib/firebase/transactions';
 import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
+import { MONTH_NAMES, getSubscriptionOptionsFromPeriod } from '@/lib/utils/filter-utils';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
-import { formatDateShort, getMonthRange } from '@/lib/utils/format-date';
+import { formatDateShort } from '@/lib/utils/format-date';
 
 // We'll reuse the Expense Filter Modal types for the generic period filter
 import { IncomeFilterModal, type IncomeFilterValues } from '@/components/ui/filter-modal';
-
-const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-
-function getSubscriptionOptionsFromPeriod(
-  period: IncomeFilterValues['period']
-): { startDate: string; endDate: string } | undefined {
-  if (period === 'all') return undefined;
-  if (period === 'current') {
-    const { start, end } = getMonthRange();
-    return { startDate: start, endDate: end };
-  }
-  if (period === 'last') {
-    const now = new Date();
-    const prev = new Date(now.getFullYear(), now.getMonth() - 1);
-    const { start, end } = getMonthRange(prev.getFullYear(), prev.getMonth());
-    return { startDate: start, endDate: end };
-  }
-  const from = new Date(period.from).toISOString();
-  const to = new Date(period.to + 'T23:59:59.999').toISOString();
-  return { startDate: from, endDate: to };
-}
 
 export default function HomeScreen() {
   const { user } = useAuth();
