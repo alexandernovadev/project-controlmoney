@@ -8,3 +8,5 @@ export { SelectModal, type SelectOption } from './select-modal';
 export { Badge } from './badge';
 export { ListItem } from './list-item';
 export { Divider } from './divider';
+export { IncomeFilterModal, type IncomeFilterValues } from './filter-modal';
+export { ExpenseFilterModal, type ExpenseFilterValues } from './expense-filter-modal';

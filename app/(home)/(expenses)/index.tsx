@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
+import { ExpenseFilterModal, type ExpenseFilterValues } from '@/components/ui/expense-filter-modal';
 import { useAuth } from '@/context/auth';
 import { getCategories } from '@/lib/firebase/categories';
 import {
@@ -16,6 +17,27 @@ import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
 import { formatDateShort, getMonthRange } from '@/lib/utils/format-date';
+
+const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+function getSubscriptionOptionsFromPeriod(
+  period: ExpenseFilterValues['period']
+): { startDate: string; endDate: string } | undefined {
+  if (period === 'all') return undefined;
+  if (period === 'current') {
+    const { start, end } = getMonthRange();
+    return { startDate: start, endDate: end };
+  }
+  if (period === 'last') {
+    const now = new Date();
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1);
+    const { start, end } = getMonthRange(prev.getFullYear(), prev.getMonth());
+    return { startDate: start, endDate: end };
+  }
+  const from = new Date(period.from).toISOString();
+  const to = new Date(period.to + 'T23:59:59.999').toISOString();
+  return { startDate: from, endDate: to };
+}
 
 type ExpenseCardProps = {
   item: Transaction;
@@ -224,38 +246,70 @@ export default function ExpensesScreen() {
   const insets = useSafeAreaInsets();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState('');
+  const [categories, setCategories] = useState<{id: string; name: string}[]>([]);
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!user?.uid) return;
-    const { start, end } = getMonthRange();
-    return subscribeExpenseTransactions(user.uid, setTransactions, {
-      startDate: start,
-      endDate: end,
-    });
-  }, [user?.uid]);
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [filterValues, setFilterValues] = useState<ExpenseFilterValues>(() => ({
+    period: 'current',
+    amountMin: '',
+    amountMax: '',
+    categoryIds: [],
+    ratingMin: '',
+  }));
 
   useEffect(() => {
     if (!user?.uid) return;
-    getCategories(user.uid).then((categories) => {
+    const options = getSubscriptionOptionsFromPeriod(filterValues.period);
+    return subscribeExpenseTransactions(user.uid, setTransactions, options);
+  }, [user?.uid, filterValues.period]);
+
+  useEffect(() => {
+    if (!user?.uid) return;
+    getCategories(user.uid).then((cats) => {
+      setCategories(cats);
       const map: Record<string, string> = {};
-      categories.forEach((c) => { map[c.id] = c.name; });
+      cats.forEach((c) => { map[c.id] = c.name; });
       setCategoryMap(map);
     });
   }, [user?.uid]);
 
   const getStoreName = (t: Transaction) =>
     typeof t.store === 'string' ? t.store : t.store?.name ?? '';
-  const filtered = search.trim()
-    ? transactions.filter(
-        (t) =>
-          t.description?.toLowerCase().includes(search.toLowerCase()) ||
-          getStoreName(t).toLowerCase().includes(search.toLowerCase()) ||
-          (categoryMap[t.categoryId ?? '']?.toLowerCase().includes(search.toLowerCase())) ||
-          (t.comment?.toLowerCase().includes(search.toLowerCase()))
-      )
-    : transactions;
+
+  let filtered = transactions;
+
+  // Amount filters
+  const amountMinNum = filterValues.amountMin ? parseFloat(filterValues.amountMin) : NaN;
+  const amountMaxNum = filterValues.amountMax ? parseFloat(filterValues.amountMax) : NaN;
+  if (!isNaN(amountMinNum)) {
+    filtered = filtered.filter((t) => t.amount >= amountMinNum);
+  }
+  if (!isNaN(amountMaxNum)) {
+    filtered = filtered.filter((t) => t.amount <= amountMaxNum);
+  }
+
+  // Categories filter
+  if (filterValues.categoryIds.length > 0) {
+    filtered = filtered.filter((t) => t.categoryId && filterValues.categoryIds.includes(t.categoryId));
+  }
+
+  // Rating filter
+  if (filterValues.ratingMin) {
+    const minRating = parseInt(filterValues.ratingMin, 10);
+    filtered = filtered.filter((t) => t.rating != null && t.rating >= minRating);
+  }
+
+  if (search.trim()) {
+    filtered = filtered.filter(
+      (t) =>
+        t.description?.toLowerCase().includes(search.toLowerCase()) ||
+        getStoreName(t).toLowerCase().includes(search.toLowerCase()) ||
+        (categoryMap[t.categoryId ?? '']?.toLowerCase().includes(search.toLowerCase())) ||
+        (t.comment?.toLowerCase().includes(search.toLowerCase()))
+    );
+  }
 
   const total = filtered.reduce((sum, t) => sum + t.amount, 0);
 
@@ -292,12 +346,36 @@ export default function ExpensesScreen() {
     ]);
   };
 
+  const handleFilterPress = () => setFilterVisible(true);
+
+  const filterLabel = (() => {
+    const p = filterValues.period;
+    if (p === 'all') return 'Todos los meses';
+    if (p === 'current') {
+      const now = new Date();
+      return `${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`;
+    }
+    if (p === 'last') {
+      const prev = new Date(new Date().getFullYear(), new Date().getMonth() - 1);
+      return `${MONTH_NAMES[prev.getMonth()]} ${prev.getFullYear()}`;
+    }
+    return `${p.from} – ${p.to}`;
+  })();
+
   return (
+    <>
+    <ExpenseFilterModal
+      visible={filterVisible}
+      onClose={() => setFilterVisible(false)}
+      initialValues={filterValues}
+      onApply={setFilterValues}
+      categories={categories}
+    />
     <ListPageLayout
       searchValue={search}
       onSearchChange={setSearch}
       searchPlaceholder="Search expenses..."
-      onFilterPress={() => {}}
+      onFilterPress={handleFilterPress}
       onAddPress={handleAdd}
     >
       <FlatList
@@ -310,6 +388,7 @@ export default function ExpensesScreen() {
         }}
         ListHeaderComponent={
           <View style={headerStyles.wrap}>
+            <Text style={headerStyles.filterLabel}>{filterLabel}</Text>
             <View style={[headerStyles.card, { backgroundColor: Colors.errorMuted }]}>
               <Text style={headerStyles.label}>Total</Text>
               <Text style={[headerStyles.total, { color: Colors.error }]}>
@@ -343,6 +422,7 @@ export default function ExpensesScreen() {
         )}
       />
     </ListPageLayout>
+    </>
   );
 }
 
@@ -374,6 +454,11 @@ const emptyStyles = {
 
 const headerStyles = {
   wrap: { marginBottom: Spacing.md },
+  filterLabel: {
+    fontSize: FontSizes.caption,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
   card: {
     borderRadius: 16,
     padding: Spacing.lg,

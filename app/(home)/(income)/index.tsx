@@ -15,9 +15,31 @@ import type { Transaction } from '@/lib/models';
 import { formatDateShort } from '@/lib/utils/format-date';
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
+import { IncomeFilterModal, type IncomeFilterValues } from '@/components/ui/filter-modal';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
 import { getMonthRange } from '@/lib/utils/format-date';
+
+const MONTH_NAMES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+function getSubscriptionOptionsFromPeriod(
+  period: IncomeFilterValues['period']
+): { startDate: string; endDate: string } | undefined {
+  if (period === 'all') return undefined;
+  if (period === 'current') {
+    const { start, end } = getMonthRange();
+    return { startDate: start, endDate: end };
+  }
+  if (period === 'last') {
+    const now = new Date();
+    const prev = new Date(now.getFullYear(), now.getMonth() - 1);
+    const { start, end } = getMonthRange(prev.getFullYear(), prev.getMonth());
+    return { startDate: start, endDate: end };
+  }
+  const from = new Date(period.from).toISOString();
+  const to = new Date(period.to + 'T23:59:59.999').toISOString();
+  return { startDate: from, endDate: to };
+}
 
 type IncomeCardProps = {
   item: Transaction;
@@ -93,15 +115,19 @@ export default function IncomeScreen() {
     Record<string, 'cash' | 'digital'>
   >({});
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [filterValues, setFilterValues] = useState<IncomeFilterValues>(() => ({
+    period: 'current',
+    type: 'all',
+    amountMin: '',
+    amountMax: '',
+  }));
 
   useEffect(() => {
     if (!user?.uid) return;
-    const { start, end } = getMonthRange();
-    return subscribeIncomeTransactions(user.uid, setTransactions, {
-      startDate: start,
-      endDate: end,
-    });
-  }, [user?.uid]);
+    const options = getSubscriptionOptionsFromPeriod(filterValues.period);
+    return subscribeIncomeTransactions(user.uid, setTransactions, options);
+  }, [user?.uid, filterValues.period]);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -123,14 +149,32 @@ export default function IncomeScreen() {
     });
   }, [user?.uid]);
 
-  const filtered = search.trim()
-    ? transactions.filter(
-        (t) =>
-          t.description?.toLowerCase().includes(search.toLowerCase()) ||
-          t.source?.toLowerCase().includes(search.toLowerCase()) ||
-          (t.categoryId && categoryMap[t.categoryId]?.toLowerCase().includes(search.toLowerCase()))
-      )
-    : transactions;
+  let filtered = transactions;
+
+  if (filterValues.type !== 'all') {
+    filtered = filtered.filter((t) => {
+      if (!t.paymentMethodId) return false;
+      return paymentMethodTypeMap[t.paymentMethodId] === filterValues.type;
+    });
+  }
+
+  const amountMinNum = filterValues.amountMin ? parseFloat(filterValues.amountMin) : NaN;
+  const amountMaxNum = filterValues.amountMax ? parseFloat(filterValues.amountMax) : NaN;
+  if (!isNaN(amountMinNum)) {
+    filtered = filtered.filter((t) => t.amount >= amountMinNum);
+  }
+  if (!isNaN(amountMaxNum)) {
+    filtered = filtered.filter((t) => t.amount <= amountMaxNum);
+  }
+
+  if (search.trim()) {
+    filtered = filtered.filter(
+      (t) =>
+        t.description?.toLowerCase().includes(search.toLowerCase()) ||
+        t.source?.toLowerCase().includes(search.toLowerCase()) ||
+        (t.categoryId && categoryMap[t.categoryId]?.toLowerCase().includes(search.toLowerCase()))
+    );
+  }
 
   const totalCash = filtered.reduce((sum, t) => {
     if (!t.paymentMethodId) return sum;
@@ -171,12 +215,35 @@ export default function IncomeScreen() {
     ]);
   };
 
+  const handleFilterPress = () => setFilterVisible(true);
+
+  const filterLabel = (() => {
+    const p = filterValues.period;
+    if (p === 'all') return 'Todos los meses';
+    if (p === 'current') {
+      const now = new Date();
+      return `${MONTH_NAMES[now.getMonth()]} ${now.getFullYear()}`;
+    }
+    if (p === 'last') {
+      const prev = new Date(new Date().getFullYear(), new Date().getMonth() - 1);
+      return `${MONTH_NAMES[prev.getMonth()]} ${prev.getFullYear()}`;
+    }
+    return `${p.from} – ${p.to}`;
+  })();
+
   return (
+    <>
+    <IncomeFilterModal
+      visible={filterVisible}
+      onClose={() => setFilterVisible(false)}
+      initialValues={filterValues}
+      onApply={setFilterValues}
+    />
     <ListPageLayout
       searchValue={search}
       onSearchChange={setSearch}
       searchPlaceholder="Search income..."
-      onFilterPress={() => {}}
+      onFilterPress={handleFilterPress}
       onAddPress={handleAdd}
     >
       <FlatList
@@ -189,6 +256,7 @@ export default function IncomeScreen() {
         }}
         ListHeaderComponent={
           <View style={headerStyles.wrap}>
+            <Text style={headerStyles.filterLabel}>{filterLabel}</Text>
             <View style={headerStyles.row}>
               <View style={[headerStyles.card, headerStyles.cardHalf, { backgroundColor: Colors.successMuted }]}>
                 <Text style={headerStyles.label}>Cash</Text>
@@ -227,6 +295,7 @@ export default function IncomeScreen() {
         )}
       />
     </ListPageLayout>
+    </>
   );
 }
 
@@ -258,6 +327,11 @@ const emptyStyles = {
 
 const headerStyles = {
   wrap: { marginBottom: Spacing.md },
+  filterLabel: {
+    fontSize: FontSizes.caption,
+    color: Colors.textSecondary,
+    marginBottom: Spacing.xs,
+  },
   row: {
     flexDirection: 'row' as const,
     gap: Spacing.sm,
