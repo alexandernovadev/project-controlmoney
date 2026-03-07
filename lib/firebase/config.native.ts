@@ -1,6 +1,10 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Use dynamic require to avoid TS error - getReactNativePersistence exists at runtime in RN
+const authModule = require('firebase/auth');
+const getReactNativePersistence = authModule.getReactNativePersistence;
 
 const firebaseConfig = {
   apiKey: "AIzaSyCMGh7WTfJW60XgcITNhAqfOc4ThIMvT-k",
@@ -12,9 +16,9 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
-// Auth: use persistence on native via config.native.ts
-const auth = getAuth(app);
+const auth = getReactNativePersistence
+  ? authModule.initializeAuth(app, { persistence: getReactNativePersistence(AsyncStorage) })
+  : authModule.getAuth(app);
 const db = getFirestore(app);
 
 export { app, auth, db };

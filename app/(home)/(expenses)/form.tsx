@@ -12,9 +12,9 @@ import {
   createTransaction,
   updateTransaction,
 } from '@/lib/firebase/transactions';
-import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
 import { getCategories } from '@/lib/firebase/categories';
-import type { IncomePaymentMethod, Category } from '@/lib/models';
+import type { Category, Unit } from '@/lib/models';
+import { UNITS } from '@/lib/models/unit';
 import { ThemedView } from '@/components/themed-view';
 import { Input } from '@/components/ui/input';
 import { DateInput } from '@/components/ui/date-input';
@@ -27,9 +27,19 @@ import { Colors, Spacing } from '@/lib/theme';
 const schema = z.object({
   amount: z.string().min(1, 'Required'),
   description: z.string().min(1, 'Required'),
-  source: z.string().optional(),
-  paymentMethodId: z.string().optional(),
-  categoryId: z.string().optional(),
+  categoryId: z.string().min(1, 'Required'),
+  store: z.string().optional(),
+  quantity: z
+    .string()
+    .min(1, 'Required')
+    .refine((val) => {
+      const n = parseFloat(val);
+      return !isNaN(n) && n >= 1 && n <= 1000;
+    }, 'Between 1 and 1000'),
+  unit: z.string().optional(),
+  unitPrice: z.string().optional(),
+  rating: z.string().optional(),
+  comment: z.string().optional(),
   date: z.string().min(1, 'Required'),
 });
 
@@ -39,7 +49,7 @@ function todayISO(): string {
   return new Date().toISOString().split('T')[0];
 }
 
-export default function IncomeFormScreen() {
+export default function ExpenseFormScreen() {
   const { user } = useAuth();
   const params = useLocalSearchParams<{ id?: string }>();
   const insets = useSafeAreaInsets();
@@ -48,8 +58,7 @@ export default function IncomeFormScreen() {
 
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
-  const [paymentMethods, setPaymentMethods] = useState<IncomePaymentMethod[]>([]);
-  const [incomeCategories, setIncomeCategories] = useState<Category[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   const {
     control,
@@ -61,23 +70,23 @@ export default function IncomeFormScreen() {
     defaultValues: {
       amount: '',
       description: '',
-      source: '',
-      paymentMethodId: '',
       categoryId: '',
+      store: '',
+      quantity: '1',
+      unit: '',
+      unitPrice: '',
+      rating: '',
+      comment: '',
       date: todayISO(),
     },
   });
 
   useEffect(() => {
     if (!user?.uid) return;
-    (async () => {
-      const [methods, categories] = await Promise.all([
-        getIncomePaymentMethods(user.uid),
-        getCategories(user.uid),
-      ]);
-      setPaymentMethods(methods);
-      setIncomeCategories(categories.filter((c) => c.type === 'income'));
-    })();
+    getCategories(user.uid).then((all) => {
+      const expenseCategories = all.filter((c) => c.type === 'expense');
+      setCategories(expenseCategories);
+    });
   }, [user?.uid]);
 
   useEffect(() => {
@@ -87,17 +96,21 @@ export default function IncomeFormScreen() {
       try {
         const tx = await getTransaction(user.uid, id);
         if (cancelled) return;
-        if (tx && tx.type === 'income') {
+        if (tx && tx.type === 'expense') {
           reset({
             amount: String(tx.amount),
             description: tx.description,
-            source: tx.source ?? '',
-            paymentMethodId: tx.paymentMethodId ?? '',
             categoryId: tx.categoryId ?? '',
+            store: typeof tx.store === 'string' ? tx.store : tx.store?.name ?? '',
+            quantity: tx.quantity != null ? String(tx.quantity) : '1',
+            unit: tx.unit ?? '',
+            unitPrice: tx.unitPrice != null ? String(tx.unitPrice) : '',
+            rating: tx.rating != null ? String(tx.rating) : '',
+            comment: tx.comment ?? '',
             date: tx.date.split('T')[0],
           });
         } else {
-          setFetchError('Income not found');
+          setFetchError('Expense not found');
         }
       } catch (e) {
         if (!cancelled) setFetchError('Error loading');
@@ -112,12 +125,16 @@ export default function IncomeFormScreen() {
     try {
       const payload = {
         userId: user.uid,
-        type: 'income' as const,
+        type: 'expense' as const,
         amount: parseFloat(values.amount) || 0,
         description: values.description,
-        source: values.source || undefined,
-        paymentMethodId: values.paymentMethodId || undefined,
         categoryId: values.categoryId || undefined,
+        store: values.store || undefined,
+        quantity: Math.min(1000, Math.max(1, parseFloat(values.quantity) || 1)),
+        unit: (values.unit || undefined) as Unit | undefined,
+        unitPrice: values.unitPrice ? parseFloat(values.unitPrice) : undefined,
+        rating: values.rating ? parseInt(values.rating, 10) : undefined,
+        comment: values.comment || undefined,
         date: new Date(values.date).toISOString(),
       };
       if (isEdit && id) {
@@ -132,14 +149,23 @@ export default function IncomeFormScreen() {
     }
   };
 
-  const methodOptions: SelectOption[] = [
-    { label: '— Select —', value: '' },
-    ...paymentMethods.map((m) => ({ label: m.label, value: m.id })),
-  ];
-
   const categoryOptions: SelectOption[] = [
     { label: '— Select category —', value: '' },
-    ...incomeCategories.map((c) => ({ label: c.name, value: c.id })),
+    ...categories.map((c) => ({ label: c.name, value: c.id })),
+  ];
+
+  const unitOptions: SelectOption[] = [
+    { label: '— Select unit —', value: '' },
+    ...UNITS.map((u) => ({ label: u.label, value: u.value })),
+  ];
+
+  const ratingOptions: SelectOption[] = [
+    { label: '— None —', value: '' },
+    { label: '1 ★', value: '1' },
+    { label: '2 ★★', value: '2' },
+    { label: '3 ★★★', value: '3' },
+    { label: '4 ★★★★', value: '4' },
+    { label: '5 ★★★★★', value: '5' },
   ];
 
   if (fetchError) {
@@ -179,33 +205,8 @@ export default function IncomeFormScreen() {
               label="Description"
               value={value}
               onChangeText={onChange}
-              placeholder="e.g. Salary, Freelance"
+              placeholder="e.g. Supermarket, Cinema"
               error={errors.description?.message}
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="source"
-          render={({ field: { onChange, value } }) => (
-            <Input
-              label="Source (optional)"
-              value={value}
-              onChangeText={onChange}
-              placeholder="e.g. Company, Client"
-            />
-          )}
-        />
-        <Controller
-          control={control}
-          name="paymentMethodId"
-          render={({ field: { onChange, value } }) => (
-            <Select
-              label="Payment method"
-              options={methodOptions}
-              value={value || null}
-              onValueChange={(v) => onChange(v || '')}
-              placeholder="Select"
             />
           )}
         />
@@ -214,11 +215,89 @@ export default function IncomeFormScreen() {
           name="categoryId"
           render={({ field: { onChange, value } }) => (
             <Select
-              label="Category (optional)"
+              label="Category"
               options={categoryOptions}
               value={value || null}
               onValueChange={(v) => onChange(v || '')}
               placeholder="Select"
+              error={errors.categoryId?.message}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="store"
+          render={({ field: { onChange, value } }) => (
+            <Input
+              label="Store (optional)"
+              value={value}
+              onChangeText={onChange}
+              placeholder="e.g. Walmart, Netflix"
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="quantity"
+          render={({ field: { onChange, value } }) => (
+            <Input
+              label="Quantity"
+              value={value}
+              onChangeText={onChange}
+              placeholder="1 - 1000"
+              keyboardType="decimal-pad"
+              error={errors.quantity?.message}
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="unit"
+          render={({ field: { onChange, value } }) => (
+            <Select
+              label="Unit (optional)"
+              options={unitOptions}
+              value={value || null}
+              onValueChange={(v) => onChange(v || '')}
+              placeholder="Select"
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="unitPrice"
+          render={({ field: { onChange, value } }) => (
+            <AmountInput
+              label="Unit price (optional)"
+              value={value ?? ''}
+              onChangeValue={onChange}
+              placeholder="0"
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="rating"
+          render={({ field: { onChange, value } }) => (
+            <Select
+              label="Rating (optional)"
+              options={ratingOptions}
+              value={value || null}
+              onValueChange={(v) => onChange(v || '')}
+              placeholder="Select"
+            />
+          )}
+        />
+        <Controller
+          control={control}
+          name="comment"
+          render={({ field: { onChange, value } }) => (
+            <Input
+              label="Comment (optional)"
+              value={value}
+              onChangeText={onChange}
+              placeholder="Notes..."
+              multiline
             />
           )}
         />
@@ -235,7 +314,7 @@ export default function IncomeFormScreen() {
           )}
         />
         <Button
-          title={isEdit ? 'Save' : 'Add income'}
+          title={isEdit ? 'Save' : 'Add expense'}
           onPress={handleSubmit(onSubmit)}
           loading={loading}
           fullWidth

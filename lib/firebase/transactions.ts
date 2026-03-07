@@ -154,3 +154,25 @@ export function subscribeIncomeTransactions(
     }
   );
 }
+
+export function subscribeExpenseTransactions(
+  userId: string,
+  onData: (transactions: Transaction[]) => void
+): Unsubscribe {
+  const q = query(
+    transactionsRef(userId),
+    orderBy('date', 'desc')
+  );
+  return onSnapshot(
+    q,
+    (snap) => {
+      const items = snap.docs
+        .map((d) => toTransaction(d.id, d.data()))
+        .filter((t) => t.type === 'expense');
+      onData(items);
+    },
+    (err) => {
+      console.error('subscribeExpenseTransactions error:', err);
+    }
+  );
+}

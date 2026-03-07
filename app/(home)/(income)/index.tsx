@@ -10,6 +10,7 @@ import {
   deleteTransaction,
 } from '@/lib/firebase/transactions';
 import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
+import { getCategories } from '@/lib/firebase/categories';
 import type { Transaction } from '@/lib/models';
 import { formatDateShort } from '@/lib/utils/format-date';
 import { ListPageLayout } from '@/components/layout/list-page-layout';
@@ -26,23 +27,32 @@ function formatAmount(amount: number): string {
 type IncomeCardProps = {
   item: Transaction;
   paymentMethodLabel?: string;
+  categoryLabel?: string;
   onPress: () => void;
   onLongPress: () => void;
 };
 
-function IncomeCard({ item, paymentMethodLabel, onPress, onLongPress }: IncomeCardProps) {
+function IncomeCard({ item, paymentMethodLabel, categoryLabel, onPress, onLongPress }: IncomeCardProps) {
+  const subtitleParts = [
+    categoryLabel ?? paymentMethodLabel ?? item.source ?? null,
+    formatDateShort(item.date),
+  ].filter(Boolean);
+  const subtitle = subtitleParts.join(' · ');
+
   return (
-    <Card onPress={onPress} onLongPress={onLongPress} padding="md">
+    <Card
+      onPress={onPress}
+      onLongPress={onLongPress}
+      padding="md"
+      style={{ borderLeftWidth: 4, borderLeftColor: Colors.success }}
+    >
       <View style={cardStyles.row}>
-        <View style={[cardStyles.iconWrap, { backgroundColor: Colors.successMuted }]}>
-          <MaterialIcons name="trending-up" size={24} color={Colors.success} />
-        </View>
         <View style={cardStyles.content}>
           <Text style={cardStyles.title} numberOfLines={1}>
             {item.description || item.source || 'Income'}
           </Text>
           <Text style={cardStyles.subtitle}>
-            {paymentMethodLabel ?? item.source ?? '—'} · {formatDateShort(item.date)}
+            {subtitle || '—'}
           </Text>
         </View>
         <Text style={[cardStyles.amount, { color: Colors.success }]}>
@@ -57,14 +67,6 @@ const cardStyles = {
   row: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-  },
-  iconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: 'center' as const,
-    justifyContent: 'center' as const,
-    marginRight: Spacing.md,
   },
   content: {
     flex: 1,
@@ -92,6 +94,7 @@ export default function IncomeScreen() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [search, setSearch] = useState('');
   const [paymentMethodMap, setPaymentMethodMap] = useState<Record<string, string>>({});
+  const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -100,10 +103,16 @@ export default function IncomeScreen() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    getIncomePaymentMethods(user.uid).then((methods) => {
-      const map: Record<string, string> = {};
-      methods.forEach((m) => { map[m.id] = m.label; });
-      setPaymentMethodMap(map);
+    Promise.all([
+      getIncomePaymentMethods(user.uid),
+      getCategories(user.uid),
+    ]).then(([methods, categories]) => {
+      const pmMap: Record<string, string> = {};
+      methods.forEach((m) => { pmMap[m.id] = m.label; });
+      setPaymentMethodMap(pmMap);
+      const catMap: Record<string, string> = {};
+      categories.forEach((c) => { catMap[c.id] = c.name; });
+      setCategoryMap(catMap);
     });
   }, [user?.uid]);
 
@@ -111,7 +120,8 @@ export default function IncomeScreen() {
     ? transactions.filter(
         (t) =>
           t.description?.toLowerCase().includes(search.toLowerCase()) ||
-          t.source?.toLowerCase().includes(search.toLowerCase())
+          t.source?.toLowerCase().includes(search.toLowerCase()) ||
+          (t.categoryId && categoryMap[t.categoryId]?.toLowerCase().includes(search.toLowerCase()))
       )
     : transactions;
 
@@ -190,6 +200,7 @@ export default function IncomeScreen() {
             <IncomeCard
               item={item}
               paymentMethodLabel={item.paymentMethodId ? paymentMethodMap[item.paymentMethodId] : undefined}
+              categoryLabel={item.categoryId ? categoryMap[item.categoryId] : undefined}
               onPress={() => handleEdit(item.id)}
               onLongPress={() => showMenu(item)}
             />

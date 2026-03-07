@@ -20,7 +20,7 @@ function RootLayoutNav() {
   useEffect(() => {
     if (Platform.OS === 'android') {
       NavigationBar.setVisibilityAsync('hidden');
-      NavigationBar.setBehaviorAsync('inset-swipe');
+      // setBehaviorAsync not supported with edge-to-edge, skipped
     }
   }, []);
 
