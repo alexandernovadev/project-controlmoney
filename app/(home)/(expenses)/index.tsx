@@ -82,13 +82,18 @@ function ExpenseCard({
         {/* Row 1: Description */}
         <Text style={cardStyles.title}>
           {item.description || 'Expense'}
+          {item.brand ? (
+            <Text style={cardStyles.brandTextInline}>
+              {` - ${item.brand}`}
+            </Text>
+          ) : null}
           {(item.unit || item.unitPrice != null) ? (
             <Text style={cardStyles.unitTextInline}>
               {' ('}
               {[
-                item.unitPrice != null ? `${formatAmountNumber(item.unitPrice)}` : null,
+                item.unitPrice != null ? `$${formatAmountNumber(item.unitPrice)}` : null,
                 item.unit ? `${item.quantity != null && item.quantity !== 1 ? item.quantity + ' ' : ''}${item.unit}` : null
-              ].filter(Boolean).join('')}
+              ].filter(Boolean).join(', ')}
               {')'}
             </Text>
           ) : null}
@@ -219,6 +224,12 @@ const cardStyles = {
     fontSize: FontSizes.body,
     fontWeight: '600' as const,
     color: Colors.text,
+  },
+  brandTextInline: {
+    fontSize: FontSizes.bodySm,
+    fontStyle: 'italic' as const,
+    fontWeight: 'normal' as const,
+    color: Colors.brandText,
   },
   unitTextInline: {
     fontSize: FontSizes.caption,

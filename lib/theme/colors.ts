@@ -28,6 +28,7 @@ export const Colors = {
   errorMuted: 'rgba(255, 59, 48, 0.2)',
   warning: '#FF9500',
   warningMuted: 'rgba(255, 149, 0, 0.2)',
+  brandText: '#d48806',
 
   // UI
   border: '#2C2C2E',

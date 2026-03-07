@@ -30,8 +30,8 @@ const schema = z.object({
   amount: z.string().min(1, 'Required'),
   description: z.string().min(1, 'Required'),
   categoryId: z.string().min(1, 'Required'),
-  brand: z.string().optional(),
-  store: z.string().optional(),
+  brand: z.string().min(1, 'Required'),
+  store: z.string().min(1, 'Required'),
   storeAddress: z.string().optional(),
   storeCountry: z.string().optional(),
   storeLat: z.string().optional(),
@@ -251,10 +251,11 @@ export default function ExpenseFormScreen() {
           name="brand"
           render={({ field: { onChange, value } }) => (
             <Input
-              label="Brand (optional)"
+              label="Brand"
               value={value}
               onChangeText={onChange}
               placeholder="e.g. Nike, Apple"
+              error={errors.brand?.message}
             />
           )}
         />
@@ -309,10 +310,11 @@ export default function ExpenseFormScreen() {
           name="store"
           render={({ field: { onChange, value } }) => (
             <Input
-              label="Store (optional)"
+              label="Store"
               value={value}
               onChangeText={onChange}
               placeholder="e.g. Walmart, Netflix"
+              error={errors.store?.message}
             />
           )}
         />
