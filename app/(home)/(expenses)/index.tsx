@@ -91,7 +91,7 @@ function ExpenseCard({
             <Text style={cardStyles.unitTextInline}>
               {' ('}
               {[
-                item.unitPrice != null ? `$${formatAmountNumber(item.unitPrice)}` : null,
+                item.unitPrice != null ? `${formatAmountNumber(item.unitPrice)}` : null,
                 item.unit ? `${item.quantity != null && item.quantity !== 1 ? item.quantity + ' ' : ''}${item.unit}` : null
               ].filter(Boolean).join(', ')}
               {')'}

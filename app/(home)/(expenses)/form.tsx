@@ -173,15 +173,15 @@ export default function ExpenseFormScreen() {
         userId: user.uid,
         type: 'expense' as const,
         amount: parseFloat(values.amount) || 0,
-        description: values.description,
+        description: values.description.trim(),
         categoryId: values.categoryId || undefined,
         brand: values.brand?.trim() || undefined,
-        store,
+        store: store,
         quantity: Math.min(1000, Math.max(1, parseFloat(values.quantity) || 1)),
         unit: (values.unit || undefined) as Unit | undefined,
         unitPrice: values.unitPrice ? parseFloat(values.unitPrice) : undefined,
         rating: values.rating ? parseInt(values.rating, 10) : undefined,
-        comment: values.comment || undefined,
+        comment: values.comment?.trim() || undefined,
         date: values.date,
       };
       if (isEdit && id) {
