@@ -35,7 +35,7 @@ export default function SystemInfoScreen() {
             <View style={styles.card}>
               <InfoRow label="Sistema Operativo" value={Platform.OS === 'ios' ? 'iOS' : Platform.OS === 'android' ? 'Android' : Platform.OS} />
               <InfoRow label="Versión del SO" value={String(Platform.Version)} />
-              <InfoRow label="Plataforma" value={Platform.isPad ? 'Tablet' : Platform.isTV ? 'TV' : 'Móvil / Default'} />
+              <InfoRow label="Plataforma" value={Platform.OS === 'ios' && Platform.isPad ? 'Tablet' : Platform.isTV ? 'TV' : 'Móvil / Default'} />
             </View>
           </View>
 
