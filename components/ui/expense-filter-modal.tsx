@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -60,17 +60,24 @@ export function ExpenseFilterModal({
       : new Date().toISOString().split('T')[0]
   );
 
+  const prevVisibleRef = useRef(false);
   useEffect(() => {
     if (visible) {
-      setPeriod(typeof initialValues.period === 'object' ? 'custom' : initialValues.period);
-      setAmountMin(initialValues.amountMin);
-      setAmountMax(initialValues.amountMax);
-      setCategoryIds(initialValues.categoryIds);
-      setRatingMin(initialValues.ratingMin);
-      if (typeof initialValues.period === 'object') {
-        setDateFrom(initialValues.period.from);
-        setDateTo(initialValues.period.to);
+      const justOpened = !prevVisibleRef.current;
+      prevVisibleRef.current = true;
+      if (justOpened) {
+        setPeriod(typeof initialValues.period === 'object' ? 'custom' : initialValues.period);
+        setAmountMin(initialValues.amountMin);
+        setAmountMax(initialValues.amountMax);
+        setCategoryIds(initialValues.categoryIds);
+        setRatingMin(initialValues.ratingMin);
+        if (typeof initialValues.period === 'object') {
+          setDateFrom(initialValues.period.from);
+          setDateTo(initialValues.period.to);
+        }
       }
+    } else {
+      prevVisibleRef.current = false;
     }
   }, [visible, initialValues]);
 
