@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { ExpenseFilterModal, type ExpenseFilterValues } from '@/components/ui/expense-filter-modal';
 import { useAuth } from '@/context/auth';
 import { getCategories } from '@/lib/firebase/categories';
+import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
 import {
   deleteTransaction,
   subscribeExpenseTransactions,
@@ -21,19 +22,21 @@ import { formatDateShort, getSubscriptionOptionsFromPeriod, MONTH_NAMES } from '
 type ExpenseCardProps = {
   item: Transaction;
   categoryLabel?: string;
+  paymentMethodLabel?: string;
   isExpanded: boolean;
   onToggleExpand: () => void;
   onEdit: () => void;
-  onLongPress: () => void;
+  onDelete: () => void;
 };
 
 function ExpenseCard({
   item,
   categoryLabel,
+  paymentMethodLabel,
   isExpanded,
   onToggleExpand,
   onEdit,
-  onLongPress,
+  onDelete,
 }: ExpenseCardProps) {
   const storeName = typeof item.store === 'string' ? item.store : item.store?.name;
   const subtitleParts = [
@@ -48,12 +51,12 @@ function ExpenseCard({
     storeName != null ||
     item.unitPrice != null ||
     item.rating != null ||
+    paymentMethodLabel != null ||
     (item.comment != null && item.comment.trim() !== '');
 
   return (
     <Card
       onPress={onToggleExpand}
-      onLongPress={onLongPress}
       padding="sm"
       style={{ borderLeftWidth: 2, paddingHorizontal: 12, paddingVertical: 10 }}
     >
@@ -108,6 +111,14 @@ function ExpenseCard({
       {isExpanded && hasExpandedContent && (
         <View style={cardStyles.expanded}>
           <View style={cardStyles.divider} />
+          
+          {paymentMethodLabel != null && paymentMethodLabel !== '' && (
+            <View style={cardStyles.detailRow}>
+              <Text style={cardStyles.detailLabel}>Pago con</Text>
+              <Text style={cardStyles.detailValue}>{paymentMethodLabel}</Text>
+            </View>
+          )}
+
           {item.brand != null && item.brand !== '' && (
             <View style={cardStyles.detailRow}>
               <Text style={cardStyles.detailLabel}>Marca</Text>
@@ -162,32 +173,58 @@ function ExpenseCard({
               </Text>
             </View>
           )}
-          <Pressable
-            onPress={onEdit}
-            style={({ pressed }) => [
-              cardStyles.editButton,
-              pressed && { opacity: 0.8 },
-            ]}
-          >
-            <MaterialIcons name="edit" size={18} color={Colors.accent} />
-            <Text style={cardStyles.editButtonText}>Edit</Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: Spacing.lg, marginTop: Spacing.md }}>
+            <Pressable
+              onPress={onEdit}
+              style={({ pressed }) => [
+                cardStyles.actionButton,
+                pressed && { opacity: 0.8 },
+              ]}
+            >
+              <MaterialIcons name="edit" size={18} color={Colors.accent} />
+              <Text style={cardStyles.editButtonText}>Editar</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={onDelete}
+              style={({ pressed }) => [
+                cardStyles.actionButton,
+                pressed && { opacity: 0.8 },
+              ]}
+            >
+              <MaterialIcons name="delete-outline" size={18} color={Colors.error} />
+              <Text style={[cardStyles.editButtonText, { color: Colors.error }]}>Eliminar</Text>
+            </Pressable>
+          </View>
         </View>
       )}
 
       {isExpanded && !hasExpandedContent && (
         <View style={cardStyles.expanded}>
           <View style={cardStyles.divider} />
-          <Pressable
-            onPress={onEdit}
-            style={({ pressed }) => [
-              cardStyles.editButton,
-              pressed && { opacity: 0.8 },
-            ]}
-          >
-            <MaterialIcons name="edit" size={18} color={Colors.accent} />
-            <Text style={cardStyles.editButtonText}>Edit</Text>
-          </Pressable>
+          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: Spacing.lg, marginTop: Spacing.xs }}>
+            <Pressable
+              onPress={onEdit}
+              style={({ pressed }) => [
+                cardStyles.actionButton,
+                pressed && { opacity: 0.8 },
+              ]}
+            >
+              <MaterialIcons name="edit" size={18} color={Colors.accent} />
+              <Text style={cardStyles.editButtonText}>Editar</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={onDelete}
+              style={({ pressed }) => [
+                cardStyles.actionButton,
+                pressed && { opacity: 0.8 },
+              ]}
+            >
+              <MaterialIcons name="delete-outline" size={18} color={Colors.error} />
+              <Text style={[cardStyles.editButtonText, { color: Colors.error }]}>Eliminar</Text>
+            </Pressable>
+          </View>
         </View>
       )}
     </Card>
@@ -264,7 +301,7 @@ const cardStyles = {
     color: Colors.text,
     flex: 1,
   },
-  editButton: {
+  actionButton: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     gap: Spacing.xs,
@@ -285,6 +322,7 @@ export default function ExpensesScreen() {
   const [search, setSearch] = useState('');
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
+  const [paymentMethodMap, setPaymentMethodMap] = useState<Record<string, string>>({});
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const [filterVisible, setFilterVisible] = useState(false);
@@ -304,11 +342,18 @@ export default function ExpensesScreen() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    getCategories(user.uid).then((cats) => {
+    Promise.all([
+      getCategories(user.uid),
+      getIncomePaymentMethods(user.uid)
+    ]).then(([cats, methods]) => {
       setCategories(cats);
       const map: Record<string, string> = {};
       cats.forEach((c) => { map[c.id] = c.name; });
       setCategoryMap(map);
+
+      const pMethodMap: Record<string, string> = {};
+      methods.forEach((m) => { pMethodMap[m.id] = m.label; });
+      setPaymentMethodMap(pMethodMap);
     });
   }, [user?.uid]);
 
@@ -356,12 +401,12 @@ export default function ExpensesScreen() {
     router.push({ pathname: '/(home)/(expenses)/form', params: { id } });
   const handleDelete = (item: Transaction) => {
     Alert.alert(
-      'Delete expense',
-      `Delete "${item.description || 'this expense'}"?`,
+      'Eliminar gasto',
+      `¿Eliminar "${item.description || 'este gasto'}"?`,
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Delete',
+          text: 'Eliminar',
           style: 'destructive',
           onPress: async () => {
             if (!user?.uid) return;
@@ -370,18 +415,6 @@ export default function ExpensesScreen() {
         },
       ]
     );
-  };
-
-  const showMenu = (item: Transaction) => {
-    Alert.alert('Expense', item.description || 'Expense', [
-      { text: 'Edit', onPress: () => handleEdit(item.id) },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => handleDelete(item),
-      },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
   };
 
   const handleFilterPress = () => setFilterVisible(true);
@@ -452,12 +485,13 @@ export default function ExpensesScreen() {
               <ExpenseCard
                 item={item}
                 categoryLabel={item.categoryId ? categoryMap[item.categoryId] : undefined}
+                paymentMethodLabel={item.paymentMethodId ? paymentMethodMap[item.paymentMethodId] : undefined}
                 isExpanded={expandedId === item.id}
                 onToggleExpand={() =>
                   setExpandedId((prev) => (prev === item.id ? null : item.id))
                 }
                 onEdit={() => handleEdit(item.id)}
-                onLongPress={() => showMenu(item)}
+                onDelete={() => handleDelete(item)}
               />
             </View>
           )}

@@ -17,12 +17,13 @@ import { SelectModal } from '@/components/ui/select-modal';
 import type { SelectOption } from '@/components/ui/select-modal';
 import { useAuth } from '@/context/auth';
 import { getCategories } from '@/lib/firebase/categories';
+import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
 import {
   createTransaction,
   getTransaction,
   updateTransaction,
 } from '@/lib/firebase/transactions';
-import type { Category, Unit } from '@/lib/models';
+import type { Category, Unit, IncomePaymentMethod } from '@/lib/models';
 import { UNITS } from '@/lib/models/unit';
 import { Colors, Spacing } from '@/lib/theme';
 
@@ -30,6 +31,7 @@ const schema = z.object({
   amount: z.string().min(1, 'Required'),
   description: z.string().min(1, 'Required'),
   categoryId: z.string().min(1, 'Required'),
+  paymentMethodId: z.string().min(1, 'Required'),
   brand: z.string().min(1, 'Required'),
   store: z.string().min(1, 'Required'),
   storeAddress: z.string().optional(),
@@ -67,6 +69,7 @@ export default function ExpenseFormScreen() {
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<IncomePaymentMethod[]>([]);
 
   const {
     control,
@@ -79,6 +82,7 @@ export default function ExpenseFormScreen() {
       amount: '',
       description: '',
       categoryId: '',
+      paymentMethodId: '',
       brand: '',
       store: '',
       storeAddress: '',
@@ -96,9 +100,13 @@ export default function ExpenseFormScreen() {
 
   useEffect(() => {
     if (!user?.uid) return;
-    getCategories(user.uid).then((all) => {
-      const expenseCategories = all.filter((c) => c.type === 'expense');
+    Promise.all([
+      getCategories(user.uid),
+      getIncomePaymentMethods(user.uid)
+    ]).then(([allCats, methods]) => {
+      const expenseCategories = allCats.filter((c) => c.type === 'expense');
       setCategories(expenseCategories);
+      setPaymentMethods(methods);
     });
   }, [user?.uid]);
 
@@ -116,6 +124,7 @@ export default function ExpenseFormScreen() {
             amount: String(tx.amount),
             description: tx.description,
             categoryId: tx.categoryId ?? '',
+            paymentMethodId: tx.paymentMethodId ?? '',
             brand: tx.brand ?? '',
             store:
               typeof tx.store === 'string'
@@ -175,6 +184,7 @@ export default function ExpenseFormScreen() {
         amount: parseFloat(values.amount) || 0,
         description: values.description.trim(),
         categoryId: values.categoryId || undefined,
+        paymentMethodId: values.paymentMethodId || undefined,
         brand: values.brand?.trim() || undefined,
         store: store,
         quantity: Math.min(1000, Math.max(1, parseFloat(values.quantity) || 1)),
@@ -213,6 +223,11 @@ export default function ExpenseFormScreen() {
     { label: '3 ★★★', value: '3' },
     { label: '4 ★★★★', value: '4' },
     { label: '5 ★★★★★', value: '5' },
+  ];
+
+  const methodOptions: SelectOption[] = [
+    { label: '— Select payment method —', value: '' },
+    ...paymentMethods.map((m) => ({ label: m.label, value: m.id })),
   ];
 
   if (fetchError) {
@@ -305,6 +320,21 @@ export default function ExpenseFormScreen() {
             />
           </View>
         </View>
+
+        <Controller
+          control={control}
+          name="paymentMethodId"
+          render={({ field: { onChange, value } }) => (
+            <SelectModal
+              label="Payment method"
+              options={methodOptions}
+              value={value || null}
+              onValueChange={(v) => onChange(v || '')}
+              placeholder="Select"
+              error={errors.paymentMethodId?.message}
+            />
+          )}
+        />
         <Controller
           control={control}
           name="store"

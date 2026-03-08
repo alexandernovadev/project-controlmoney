@@ -30,7 +30,7 @@ const schema = z.object({
   amount: z.string().min(1, 'Required'),
   description: z.string().min(1, 'Required'),
   source: z.string().optional(),
-  paymentMethodId: z.string().optional(),
+  paymentMethodId: z.string().min(1, 'Required'),
   categoryId: z.string().optional(),
   date: z.string().min(1, 'Required'),
 });
@@ -215,6 +215,7 @@ export default function IncomeFormScreen() {
               value={value || null}
               onValueChange={(v) => onChange(v || '')}
               placeholder="Select"
+              error={errors.paymentMethodId?.message}
             />
           )}
         />
