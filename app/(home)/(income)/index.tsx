@@ -171,8 +171,15 @@ export default function IncomeScreen() {
     );
   }
 
-  const totalCash = calculateTotalByMethodType(filtered, paymentMethodTypeMap, 'cash');
-  const totalDigital = calculateTotalByMethodType(filtered, paymentMethodTypeMap, 'digital');
+  const incomeByMethod = Object.keys(paymentMethodMap).map((id) => {
+    const total = filtered.filter(t => t.paymentMethodId === id).reduce((sum, t) => sum + t.amount, 0);
+    return {
+      id,
+      name: paymentMethodMap[id] || 'Desconocido',
+      type: paymentMethodTypeMap[id] || 'digital',
+      total
+    };
+  }).filter(m => m.total > 0);
 
   const handleAdd = () => router.push('/(home)/(income)/form');
   const handleEdit = (id: string) =>
@@ -249,25 +256,22 @@ export default function IncomeScreen() {
         ListHeaderComponent={
           <View style={headerStyles.wrap}>
             <Text style={headerStyles.filterLabel}>{filterLabel}</Text>
-            <View style={headerStyles.row}>
-              <View style={[headerStyles.card, headerStyles.cardHalf, { backgroundColor: Colors.successMuted, borderColor: 'rgba(52, 199, 89, 0.3)' }]}>
-                <View style={headerStyles.cardHeader}>
-                  <MaterialIcons name="payments" size={16} color={Colors.success} />
-                  <Text style={[headerStyles.label, { color: Colors.success }]}>Cash</Text>
-                </View>
-                <Text style={[headerStyles.total, { color: Colors.success }]}>
-                  ${formatAmountNumber(totalCash)}
-                </Text>
-              </View>
-              <View style={[headerStyles.card, headerStyles.cardHalf, { backgroundColor: 'rgba(10, 132, 255, 0.15)', borderColor: 'rgba(10, 132, 255, 0.3)' }]}>
-                <View style={headerStyles.cardHeader}>
-                  <MaterialIcons name="account-balance-wallet" size={16} color={Colors.accent} />
-                  <Text style={[headerStyles.label, { color: Colors.accent }]}>Digital</Text>
-                </View>
-                <Text style={[headerStyles.total, { color: Colors.accent }]}>
-                  ${formatAmountNumber(totalDigital)}
-                </Text>
-              </View>
+            <View style={[headerStyles.row, { flexWrap: 'wrap' }]}>
+              {incomeByMethod.map((method) => (
+                <Card key={method.id} style={[headerStyles.cardHalf, { minWidth: '45%', padding: Spacing.xs }]}>
+                  <View style={headerStyles.cardHeader}>
+                    <MaterialIcons 
+                      name={method.type === 'cash' ? 'payments' : 'account-balance-wallet'} 
+                      size={14} 
+                      color={method.type === 'cash' ? Colors.success : Colors.accent} 
+                    />
+                    <Text style={[headerStyles.label, { color: Colors.textSecondary, flex: 1 }]} numberOfLines={1}>{method.name}</Text>
+                  </View>
+                  <Text style={[headerStyles.total, { color: Colors.text }]}>
+                    ${formatAmountNumber(method.total)}
+                  </Text>
+                </Card>
+              ))}
             </View>
           </View>
         }
@@ -336,7 +340,7 @@ const headerStyles = {
   },
   card: {
     borderRadius: 16,
-    padding: Spacing.md,
+    padding: Spacing.sm,
     borderWidth: 1,
   },
   cardHalf: {
@@ -346,16 +350,14 @@ const headerStyles = {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     gap: Spacing.xs,
-    marginBottom: Spacing.xs,
+    marginBottom: 2,
   },
   label: {
     fontSize: FontSizes.caption,
     fontWeight: '600' as const,
-    textTransform: 'uppercase' as const,
-    letterSpacing: 1,
   },
   total: {
-    fontSize: FontSizes.h2,
+    fontSize: FontSizes.body,
     fontWeight: '700' as const,
   },
 };
