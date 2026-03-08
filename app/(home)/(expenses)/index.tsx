@@ -23,8 +23,6 @@ type ExpenseCardProps = {
   item: Transaction;
   categoryLabel?: string;
   paymentMethodLabel?: string;
-  isExpanded: boolean;
-  onToggleExpand: () => void;
   onEdit: () => void;
   onDelete: () => void;
 };
@@ -33,8 +31,6 @@ function ExpenseCard({
   item,
   categoryLabel,
   paymentMethodLabel,
-  isExpanded,
-  onToggleExpand,
   onEdit,
   onDelete,
 }: ExpenseCardProps) {
@@ -56,7 +52,6 @@ function ExpenseCard({
 
   return (
     <Card
-      onPress={onToggleExpand}
       padding="sm"
       style={{ borderLeftWidth: 2, paddingHorizontal: 12, paddingVertical: 10 }}
     >
@@ -93,12 +88,6 @@ function ExpenseCard({
             <Text style={[cardStyles.amount, { color: Colors.error }]}>
               -${formatAmountNumber(item.amount)}
             </Text>
-            <MaterialIcons
-              name={isExpanded ? 'expand-less' : 'expand-more'}
-              size={24}
-              color={Colors.textSecondary}
-              style={{ marginLeft: Spacing.xs }}
-            />
           </View>
         </View>
 
@@ -108,125 +97,102 @@ function ExpenseCard({
         </Text>
       </View>
 
-      {isExpanded && hasExpandedContent && (
-        <View style={cardStyles.expanded}>
-          <View style={cardStyles.divider} />
-          
-          {paymentMethodLabel != null && paymentMethodLabel !== '' && (
-            <View style={cardStyles.detailRow}>
-              <Text style={cardStyles.detailLabel}>Pago con</Text>
-              <Text style={cardStyles.detailValue}>{paymentMethodLabel}</Text>
-            </View>
-          )}
+      <View style={cardStyles.expanded}>
+        {hasExpandedContent && (
+          <>
+            <View style={cardStyles.divider} />
+            
+            {paymentMethodLabel != null && paymentMethodLabel !== '' && (
+              <View style={cardStyles.detailRow}>
+                <Text style={cardStyles.detailLabel}>Pago con</Text>
+                <Text style={cardStyles.detailValue}>{paymentMethodLabel}</Text>
+              </View>
+            )}
 
-          {item.brand != null && item.brand !== '' && (
-            <View style={cardStyles.detailRow}>
-              <Text style={cardStyles.detailLabel}>Marca</Text>
-              <Text style={cardStyles.detailValue}>{item.brand}</Text>
-            </View>
-          )}
-          {item.quantity != null && (
-            <View style={cardStyles.detailRow}>
-              <Text style={cardStyles.detailLabel}>Cantidad</Text>
-              <Text style={cardStyles.detailValue}>
-                {String(item.quantity)}
-                {item.quantity > 1 && (
-                  <Text style={{ fontSize: FontSizes.caption, color: Colors.textSecondary }}>
-                    {' '}
-                    (c/u {formatAmountNumber(item.amount / item.quantity)})
-                  </Text>
-                )}
-              </Text>
-            </View>
-          )}
+            {item.brand != null && item.brand !== '' && (
+              <View style={cardStyles.detailRow}>
+                <Text style={cardStyles.detailLabel}>Marca</Text>
+                <Text style={cardStyles.detailValue}>{item.brand}</Text>
+              </View>
+            )}
+            {item.quantity != null && (
+              <View style={cardStyles.detailRow}>
+                <Text style={cardStyles.detailLabel}>Cantidad</Text>
+                <Text style={cardStyles.detailValue}>
+                  {String(item.quantity)}
+                  {item.quantity > 1 && (
+                    <Text style={{ fontSize: FontSizes.caption, color: Colors.textSecondary }}>
+                      {' '}
+                      (c/u {formatAmountNumber(item.amount / item.quantity)})
+                    </Text>
+                  )}
+                </Text>
+              </View>
+            )}
 
-          {storeName != null && storeName !== '' && (
-            <View style={cardStyles.detailRow}>
-              <Text style={cardStyles.detailLabel}>Tienda</Text>
-              <Text style={cardStyles.detailValue}>{storeName}</Text>
-            </View>
-          )}
-          {item.unitPrice != null && (
-            <View style={cardStyles.detailRow}>
-              <Text style={cardStyles.detailLabel}>Valor</Text>
-              <Text style={cardStyles.detailValue}>
-                {[formatAmountNumber(item.unitPrice), item.unit ?? null]
-                  .filter(Boolean)
-                  .join(' ')}
-              </Text>
-            </View>
-          )}
-          {item.rating != null && (
-            <View style={cardStyles.detailRow}>
-              <Text style={cardStyles.detailLabel}>Rating</Text>
-              <Text style={cardStyles.detailValue}>
-                {'★'.repeat(Math.round(item.rating))}
-                {'☆'.repeat(5 - Math.round(item.rating))}
-              </Text>
-            </View>
-          )}
-          {item.comment != null && item.comment.trim() !== '' && (
-            <View style={cardStyles.detailRow}>
-              <Text style={cardStyles.detailLabel}>Comentario</Text>
-              <Text style={cardStyles.detailValue} numberOfLines={3}>
-                {item.comment}
-              </Text>
-            </View>
-          )}
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: Spacing.lg, marginTop: Spacing.md }}>
-            <Pressable
-              onPress={onEdit}
-              style={({ pressed }) => [
-                cardStyles.actionButton,
-                pressed && { opacity: 0.8 },
-              ]}
-            >
-              <MaterialIcons name="edit" size={18} color={Colors.accent} />
-              <Text style={cardStyles.editButtonText}>Editar</Text>
-            </Pressable>
+            {storeName != null && storeName !== '' && (
+              <View style={cardStyles.detailRow}>
+                <Text style={cardStyles.detailLabel}>Tienda</Text>
+                <Text style={cardStyles.detailValue}>{storeName}</Text>
+              </View>
+            )}
+            {item.unitPrice != null && (
+              <View style={cardStyles.detailRow}>
+                <Text style={cardStyles.detailLabel}>Valor</Text>
+                <Text style={cardStyles.detailValue}>
+                  {[formatAmountNumber(item.unitPrice), item.unit ?? null]
+                    .filter(Boolean)
+                    .join(' ')}
+                </Text>
+              </View>
+            )}
+            {item.rating != null && (
+              <View style={cardStyles.detailRow}>
+                <Text style={cardStyles.detailLabel}>Rating</Text>
+                <Text style={cardStyles.detailValue}>
+                  {'★'.repeat(Math.round(item.rating))}
+                  {'☆'.repeat(5 - Math.round(item.rating))}
+                </Text>
+              </View>
+            )}
+            {item.comment != null && item.comment.trim() !== '' && (
+              <View style={cardStyles.detailRow}>
+                <Text style={cardStyles.detailLabel}>Comentario</Text>
+                <Text style={cardStyles.detailValue} numberOfLines={3}>
+                  {item.comment}
+                </Text>
+              </View>
+            )}
+          </>
+        )}
+        
+        {/* Siempre mostramos los botones, con su divisor si no hay contenido expandido para no pegar los botones a la fecha */}
+        {!hasExpandedContent && <View style={[cardStyles.divider, { marginBottom: 4 }]} />}
+        
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 2 }}>
+          <Pressable
+            onPress={onEdit}
+            style={({ pressed }) => [
+              cardStyles.actionButton,
+              pressed && { opacity: 0.8 },
+            ]}
+          >
+            <MaterialIcons name="edit" size={18} color={Colors.accent} />
+            <Text style={cardStyles.editButtonText}>Editar</Text>
+          </Pressable>
 
-            <Pressable
-              onPress={onDelete}
-              style={({ pressed }) => [
-                cardStyles.actionButton,
-                pressed && { opacity: 0.8 },
-              ]}
-            >
-              <MaterialIcons name="delete-outline" size={18} color={Colors.error} />
-              <Text style={[cardStyles.editButtonText, { color: Colors.error }]}>Eliminar</Text>
-            </Pressable>
-          </View>
+          <Pressable
+            onPress={onDelete}
+            style={({ pressed }) => [
+              cardStyles.actionButton,
+              pressed && { opacity: 0.8 },
+            ]}
+          >
+            <MaterialIcons name="delete-outline" size={18} color={Colors.error} />
+            <Text style={[cardStyles.editButtonText, { color: Colors.error }]}>Eliminar</Text>
+          </Pressable>
         </View>
-      )}
-
-      {isExpanded && !hasExpandedContent && (
-        <View style={cardStyles.expanded}>
-          <View style={cardStyles.divider} />
-          <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: Spacing.lg, marginTop: Spacing.xs }}>
-            <Pressable
-              onPress={onEdit}
-              style={({ pressed }) => [
-                cardStyles.actionButton,
-                pressed && { opacity: 0.8 },
-              ]}
-            >
-              <MaterialIcons name="edit" size={18} color={Colors.accent} />
-              <Text style={cardStyles.editButtonText}>Editar</Text>
-            </Pressable>
-
-            <Pressable
-              onPress={onDelete}
-              style={({ pressed }) => [
-                cardStyles.actionButton,
-                pressed && { opacity: 0.8 },
-              ]}
-            >
-              <MaterialIcons name="delete-outline" size={18} color={Colors.error} />
-              <Text style={[cardStyles.editButtonText, { color: Colors.error }]}>Eliminar</Text>
-            </Pressable>
-          </View>
-        </View>
-      )}
+      </View>
     </Card>
   );
 }
@@ -304,9 +270,9 @@ const cardStyles = {
   actionButton: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    gap: Spacing.xs,
-    marginTop: Spacing.sm,
-    paddingVertical: Spacing.xs,
+    gap: 4,
+    paddingVertical: 2,
+    paddingHorizontal: 4,
   },
   editButtonText: {
     fontSize: FontSizes.bodySm,
@@ -323,7 +289,6 @@ export default function ExpensesScreen() {
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
   const [paymentMethodMap, setPaymentMethodMap] = useState<Record<string, string>>({});
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const [filterVisible, setFilterVisible] = useState(false);
   const [filterValues, setFilterValues] = useState<ExpenseFilterValues>(() => ({
@@ -486,10 +451,6 @@ export default function ExpensesScreen() {
                 item={item}
                 categoryLabel={item.categoryId ? categoryMap[item.categoryId] : undefined}
                 paymentMethodLabel={item.paymentMethodId ? paymentMethodMap[item.paymentMethodId] : undefined}
-                isExpanded={expandedId === item.id}
-                onToggleExpand={() =>
-                  setExpandedId((prev) => (prev === item.id ? null : item.id))
-                }
                 onEdit={() => handleEdit(item.id)}
                 onDelete={() => handleDelete(item)}
               />
