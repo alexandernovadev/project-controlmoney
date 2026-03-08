@@ -13,7 +13,7 @@ import { AmountInput } from '@/components/ui/amount-input';
 import { Button } from '@/components/ui/button';
 import { DateInput } from '@/components/ui/date-input';
 import { Input } from '@/components/ui/input';
-import { Select } from '@/components/ui/select';
+import { SelectModal } from '@/components/ui/select-modal';
 import type { SelectOption } from '@/components/ui/select-modal';
 import { useAuth } from '@/context/auth';
 import { getCategories } from '@/lib/firebase/categories';
@@ -209,7 +209,7 @@ export default function IncomeFormScreen() {
           control={control}
           name="paymentMethodId"
           render={({ field: { onChange, value } }) => (
-            <Select
+            <SelectModal
               label="Payment method"
               options={methodOptions}
               value={value || null}
@@ -222,7 +222,7 @@ export default function IncomeFormScreen() {
           control={control}
           name="categoryId"
           render={({ field: { onChange, value } }) => (
-            <Select
+            <SelectModal
               label="Category (optional)"
               options={categoryOptions}
               value={value || null}
