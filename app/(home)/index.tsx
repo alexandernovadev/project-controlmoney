@@ -1,6 +1,6 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, RefreshControl } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Card } from '@/components/ui/card';
@@ -41,6 +41,31 @@ export default function HomeScreen() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [period, setPeriod] = useState<IncomeFilterValues['period']>('current');
 
+  // Refresh state
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    if (!user?.uid) return;
+    setRefreshing(true);
+    
+    // Reload metadata
+    try {
+      const categorias = await getCategories(user.uid);
+      const categoriesMap: Record<string, string> = {};
+      categorias.forEach((c) => { categoriesMap[c.id] = c.name; });
+      setCategories(categoriesMap);
+
+      const methods = await getIncomePaymentMethods(user.uid);
+      const methodMap: Record<string, { label: string, type: 'cash' | 'digital' }> = {};
+      methods.forEach((m) => { methodMap[m.id] = { label: m.label, type: m.type }; });
+      setPaymentMethods(methodMap);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   // Subscriptions
   useEffect(() => {
     if (!user?.uid) return;
@@ -59,9 +84,9 @@ export default function HomeScreen() {
   useEffect(() => {
     if (!user?.uid) return;
     
-    getCategories(user.uid).then((cats) => {
+    getCategories(user.uid).then((categorias) => {
       const map: Record<string, string> = {};
-      cats.forEach((c) => { map[c.id] = c.name; });
+      categorias.forEach((c) => { map[c.id] = c.name; });
       setCategories(map);
     });
 
@@ -116,6 +141,15 @@ export default function HomeScreen() {
         style={[styles.container, { paddingTop: insets.top }]}
         contentContainerStyle={{ paddingBottom: insets.bottom + 80 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.accent}
+            colors={[Colors.accent]}
+            progressBackgroundColor={Colors.backgroundSecondary}
+          />
+        }
       >
         <View style={styles.header}>
           <Text style={styles.headerTitle}>Dashboard</Text>

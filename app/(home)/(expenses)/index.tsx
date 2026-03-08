@@ -311,10 +311,10 @@ export default function ExpensesScreen() {
     Promise.all([
       getCategories(user.uid),
       getIncomePaymentMethods(user.uid)
-    ]).then(([cats, methods]) => {
-      setCategories(cats);
+    ]).then(([categorias, methods]) => {
+      setCategories(categorias);
       const map: Record<string, string> = {};
-      cats.forEach((c) => { map[c.id] = c.name; });
+      categorias.forEach((c) => { map[c.id] = c.name; });
       setCategoryMap(map);
 
       const pMethodMap: Record<string, string> = {};

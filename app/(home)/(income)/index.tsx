@@ -138,9 +138,9 @@ export default function IncomeScreen() {
       });
       setPaymentMethodMap(pmMap);
       setPaymentMethodTypeMap(pmTypeMap);
-      const catMap: Record<string, string> = {};
-      categories.forEach((c) => { catMap[c.id] = c.name; });
-      setCategoryMap(catMap);
+      const categoriesMap: Record<string, string> = {};
+      categories.forEach((c) => { categoriesMap[c.id] = c.name; });
+      setCategoryMap(categoriesMap);
     });
   }, [user?.uid]);
 
