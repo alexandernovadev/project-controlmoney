@@ -18,6 +18,7 @@ import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
 import { formatDateShort, getSubscriptionOptionsFromPeriod, MONTH_NAMES } from '@/lib/utils/format-date';
+import { calculateTotal } from '@/lib/utils/calculations';
 
 type ExpenseCardProps = {
   item: Transaction;
@@ -359,7 +360,7 @@ export default function ExpensesScreen() {
     );
   }
 
-  const total = filtered.reduce((sum, t) => sum + t.amount, 0);
+  const total = calculateTotal(filtered);
 
   const handleAdd = () => router.push('/(home)/(expenses)/form');
   const handleEdit = (id: string) =>

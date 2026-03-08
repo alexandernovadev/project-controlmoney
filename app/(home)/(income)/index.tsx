@@ -18,6 +18,7 @@ import type { Transaction } from '@/lib/models';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 import { formatAmountNumber } from '@/lib/utils/format-amount';
 import { formatDateShort, getSubscriptionOptionsFromPeriod, MONTH_NAMES } from '@/lib/utils/format-date';
+import { calculateTotalByMethodType } from '@/lib/utils/calculations';
 
 type IncomeCardProps = {
   item: Transaction;
@@ -170,11 +171,8 @@ export default function IncomeScreen() {
     );
   }
 
-  const totalCash = filtered.reduce((sum, t) => {
-    if (!t.paymentMethodId) return sum;
-    return paymentMethodTypeMap[t.paymentMethodId] === 'cash' ? sum + t.amount : sum;
-  }, 0);
-  const totalDigital = filtered.reduce((sum, t) => sum + t.amount, 0) - totalCash;
+  const totalCash = calculateTotalByMethodType(filtered, paymentMethodTypeMap, 'cash');
+  const totalDigital = calculateTotalByMethodType(filtered, paymentMethodTypeMap, 'digital');
 
   const handleAdd = () => router.push('/(home)/(income)/form');
   const handleEdit = (id: string) =>

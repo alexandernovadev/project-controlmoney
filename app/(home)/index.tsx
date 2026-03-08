@@ -14,6 +14,16 @@ import { MONTH_NAMES, getSubscriptionOptionsFromPeriod } from '@/lib/utils/forma
 import { formatAmountNumber } from '@/lib/utils/format-amount';
 import { formatDateShort } from '@/lib/utils/format-date';
 
+import {
+  calculateTotal,
+  calculateGeneralBalance,
+  calculateBalanceByMethod,
+  calculateExpensesByCategory,
+  getMostExpensiveTransaction,
+  getCheapestTransaction,
+  getMostRepeatedExpense,
+} from '@/lib/utils/calculations';
+
 // We'll reuse the Expense Filter Modal types for the generic period filter
 import { IncomeFilterModal, type IncomeFilterValues } from '@/components/ui/filter-modal';
 
@@ -63,70 +73,20 @@ export default function HomeScreen() {
   }, [user?.uid]);
 
   // Derived Data: Totals
-  const totalIncome = incomes.reduce((sum, t) => sum + t.amount, 0);
-  const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
-  const balance = totalIncome - totalExpense;
+  const totalIncome = calculateTotal(incomes);
+  const totalExpense = calculateTotal(expenses);
+  const balance = calculateGeneralBalance(incomes, expenses);
 
   // Derived Data: Balance by Payment Method
-  const balanceByMethod = Object.keys(paymentMethods).map((methodId) => {
-    // Sumar todos los ingresos que entraron a este método
-    const incomeForMethod = incomes
-      .filter((t) => t.paymentMethodId === methodId)
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    // Restar todos los gastos que salieron de este método
-    const expenseForMethod = expenses
-      .filter((t) => t.paymentMethodId === methodId)
-      .reduce((sum, t) => sum + t.amount, 0);
-
-    return {
-      id: methodId,
-      name: paymentMethods[methodId]?.label || 'Desconocido',
-      type: paymentMethods[methodId]?.type || 'digital',
-      balance: incomeForMethod - expenseForMethod,
-    };
-  }).filter(m => m.balance !== 0); // Ocultar los que estén en cero
+  const balanceByMethod = calculateBalanceByMethod(incomes, expenses, paymentMethods);
 
   // Derived Data: Expenses by Category
-  const expensesByCategory = expenses.reduce((acc, t) => {
-    const catId = t.categoryId || 'uncategorized';
-    acc[catId] = (acc[catId] || 0) + t.amount;
-    return acc;
-  }, {} as Record<string, number>);
-  
-  const topCategories = Object.entries(expensesByCategory)
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 3)
-    .map(([id, amount]) => ({
-      id,
-      name: categories[id] || 'Other',
-      amount,
-      percentage: totalExpense > 0 ? (amount / totalExpense) * 100 : 0
-    }));
+  const topCategories = calculateExpensesByCategory(expenses, categories, 3);
 
   // Derived Data: Insights (Expenses)
-  const mostExpensive = expenses.length > 0 
-    ? expenses.reduce((max, t) => t.amount > max.amount ? t : max, expenses[0])
-    : null;
-
-  const cheapest = expenses.length > 0
-    ? expenses.reduce((min, t) => t.amount < min.amount ? t : min, expenses[0])
-    : null;
-
-  // Count repetitions by description/store
-  const repetitions = expenses.reduce((acc, t) => {
-    const key = t.description?.toLowerCase().trim() || 
-                (typeof t.store === 'string' ? t.store : t.store?.name)?.toLowerCase().trim() || 
-                'Unknown';
-    if (!acc[key]) acc[key] = { count: 0, total: 0, name: t.description || 'Unknown' };
-    acc[key].count += 1;
-    acc[key].total += t.amount;
-    return acc;
-  }, {} as Record<string, { count: number, total: number, name: string }>);
-
-  const mostRepeated = Object.values(repetitions)
-    .filter(r => r.count > 1)
-    .sort((a, b) => b.count - a.count)[0] || null;
+  const mostExpensive = getMostExpensiveTransaction(expenses);
+  const cheapest = getCheapestTransaction(expenses);
+  const mostRepeated = getMostRepeatedExpense(expenses);
 
   // Filter label
   const filterLabel = (() => {
