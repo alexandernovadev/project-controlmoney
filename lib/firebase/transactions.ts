@@ -19,6 +19,7 @@ import {
   type Timestamp,
 } from 'firebase/firestore';
 import { db } from './config';
+import { toStorageISO } from '@/lib/utils/format-date';
 import type {
   Transaction,
   TransactionCreate,
@@ -39,7 +40,7 @@ const toTransaction = (id: string, data: Record<string, unknown>): Transaction =
     description: String(data.description ?? ''),
     source: data.source ? String(data.source) : undefined,
     paymentMethodId: data.paymentMethodId ? String(data.paymentMethodId) : undefined,
-    date: toDate(data.date),
+    date: toStorageISO(toDate(data.date)),
     createdAt: toDate(data.createdAt),
     updatedAt: toDate(data.updatedAt),
     categoryId: data.categoryId ? String(data.categoryId) : undefined,
@@ -74,6 +75,7 @@ export async function createTransaction(
   const now = new Date().toISOString();
   const payload = omitUndefined({
     ...data,
+    date: data.date ? toStorageISO(data.date) : undefined,
     userId,
     createdAt: now,
     updatedAt: now,
@@ -122,6 +124,7 @@ export async function updateTransaction(
   const ref = transactionRef(userId, transactionId);
   const payload = omitUndefined({
     ...data,
+    date: data.date ? toStorageISO(data.date) : undefined,
     updatedAt: new Date().toISOString(),
   });
   await updateDoc(ref, payload);

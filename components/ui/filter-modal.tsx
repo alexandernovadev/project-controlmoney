@@ -15,7 +15,7 @@ import { Colors, Spacing, FontSizes } from '@/lib/theme';
 import { DateInput } from './date-input';
 import { AmountInput } from './amount-input';
 import { Button } from './button';
-import { getMonthRange } from '@/lib/utils/format-date';
+import { getMonthRange, toISOStartOfDay } from '@/lib/utils/format-date';
 
 export type IncomeFilterValues = {
   period: 'current' | 'last' | 'all' | { from: string; to: string };
@@ -51,12 +51,12 @@ export function IncomeFilterModal({
   const [dateFrom, setDateFrom] = useState(
     typeof initialValues.period === 'object'
       ? initialValues.period.from
-      : new Date().toISOString().split('T')[0]
+      : toISOStartOfDay(new Date())
   );
   const [dateTo, setDateTo] = useState(
     typeof initialValues.period === 'object'
       ? initialValues.period.to
-      : new Date().toISOString().split('T')[0]
+      : toISOStartOfDay(new Date())
   );
 
   const prevVisibleRef = useRef(false);
@@ -100,8 +100,8 @@ export function IncomeFilterModal({
     setType('all');
     setAmountMin('');
     setAmountMax('');
-    setDateFrom(start.split('T')[0]);
-    setDateTo(end.split('T')[0]);
+    setDateFrom(start);
+    setDateTo(end);
     onApply({
       period: 'current',
       type: 'all',

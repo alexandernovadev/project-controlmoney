@@ -15,7 +15,7 @@ import { Colors, Spacing, FontSizes } from '@/lib/theme';
 import { DateInput } from './date-input';
 import { AmountInput } from './amount-input';
 import { Button } from './button';
-import { getMonthRange } from '@/lib/utils/format-date';
+import { getMonthRange, toISOStartOfDay } from '@/lib/utils/format-date';
 import type { Unit } from '@/lib/models';
 
 export type ExpenseFilterValues = {
@@ -52,12 +52,12 @@ export function ExpenseFilterModal({
   const [dateFrom, setDateFrom] = useState(
     typeof initialValues.period === 'object'
       ? initialValues.period.from
-      : new Date().toISOString().split('T')[0]
+      : toISOStartOfDay(new Date())
   );
   const [dateTo, setDateTo] = useState(
     typeof initialValues.period === 'object'
       ? initialValues.period.to
-      : new Date().toISOString().split('T')[0]
+      : toISOStartOfDay(new Date())
   );
 
   const prevVisibleRef = useRef(false);
@@ -102,8 +102,8 @@ export function ExpenseFilterModal({
     setAmountMax('');
     setCategoryIds([]);
     setRatingMin('');
-    setDateFrom(start.split('T')[0]);
-    setDateTo(end.split('T')[0]);
+    setDateFrom(start);
+    setDateTo(end);
     onApply({
       period: 'current',
       amountMin: '',
