@@ -25,7 +25,7 @@ export default function HomeScreen() {
   const [incomes, setIncomes] = useState<Transaction[]>([]);
   const [expenses, setExpenses] = useState<Transaction[]>([]);
   const [categories, setCategories] = useState<Record<string, string>>({});
-  const [paymentMethods, setPaymentMethods] = useState<Record<string, 'cash' | 'digital'>>({});
+  const [paymentMethods, setPaymentMethods] = useState<Record<string, { label: string, type: 'cash' | 'digital' }>>({});
   
   // Filter state (only using period for home)
   const [filterVisible, setFilterVisible] = useState(false);
@@ -56,8 +56,8 @@ export default function HomeScreen() {
     });
 
     getIncomePaymentMethods(user.uid).then((methods) => {
-      const map: Record<string, 'cash' | 'digital'> = {};
-      methods.forEach((m) => { map[m.id] = m.type; });
+      const map: Record<string, { label: string, type: 'cash' | 'digital' }> = {};
+      methods.forEach((m) => { map[m.id] = { label: m.label, type: m.type }; });
       setPaymentMethods(map);
     });
   }, [user?.uid]);
@@ -67,11 +67,25 @@ export default function HomeScreen() {
   const totalExpense = expenses.reduce((sum, t) => sum + t.amount, 0);
   const balance = totalIncome - totalExpense;
 
-  // Derived Data: Cash vs Digital
-  const cashIncome = incomes.reduce((sum, t) => 
-    t.paymentMethodId && paymentMethods[t.paymentMethodId] === 'cash' ? sum + t.amount : sum, 0
-  );
-  const digitalIncome = totalIncome - cashIncome;
+  // Derived Data: Balance by Payment Method
+  const balanceByMethod = Object.keys(paymentMethods).map((methodId) => {
+    // Sumar todos los ingresos que entraron a este método
+    const incomeForMethod = incomes
+      .filter((t) => t.paymentMethodId === methodId)
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    // Restar todos los gastos que salieron de este método
+    const expenseForMethod = expenses
+      .filter((t) => t.paymentMethodId === methodId)
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    return {
+      id: methodId,
+      name: paymentMethods[methodId]?.label || 'Desconocido',
+      type: paymentMethods[methodId]?.type || 'digital',
+      balance: incomeForMethod - expenseForMethod,
+    };
+  }).filter(m => m.balance !== 0); // Ocultar los que estén en cero
 
   // Derived Data: Expenses by Category
   const expensesByCategory = expenses.reduce((acc, t) => {
@@ -188,26 +202,29 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        {/* CASH VS DIGITAL */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Distribución de Ingresos</Text>
-          <View style={styles.cardsRow}>
-            <Card style={styles.miniCard}>
-              <View style={styles.miniCardHeader}>
-                <MaterialIcons name="payments" size={16} color={Colors.success} />
-                <Text style={styles.miniCardLabel}>Efectivo</Text>
-              </View>
-              <Text style={styles.miniCardAmount}>${formatAmountNumber(cashIncome)}</Text>
-            </Card>
-            <Card style={styles.miniCard}>
-              <View style={styles.miniCardHeader}>
-                <MaterialIcons name="account-balance-wallet" size={16} color={Colors.accent} />
-                <Text style={styles.miniCardLabel}>Digital</Text>
-              </View>
-              <Text style={styles.miniCardAmount}>${formatAmountNumber(digitalIncome)}</Text>
-            </Card>
+        {/* BALANCE POR MÉTODO */}
+        {balanceByMethod.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Distribución de dinero</Text>
+            <View style={[styles.cardsRow, { flexWrap: 'wrap' }]}>
+              {balanceByMethod.map((method) => (
+                <Card key={method.id} style={[styles.miniCard, { minWidth: '45%' }]}>
+                  <View style={styles.miniCardHeader}>
+                    <MaterialIcons 
+                      name={method.type === 'cash' ? 'payments' : 'account-balance-wallet'} 
+                      size={16} 
+                      color={method.type === 'cash' ? Colors.success : Colors.accent} 
+                    />
+                    <Text style={styles.miniCardLabel}>{method.name}</Text>
+                  </View>
+                  <Text style={[styles.miniCardAmount, method.balance < 0 && { color: Colors.error }]}>
+                    {method.balance < 0 ? '-' : ''}${formatAmountNumber(Math.abs(method.balance))}
+                  </Text>
+                </Card>
+              ))}
+            </View>
           </View>
-        </View>
+        )}
 
         {/* TOP CATEGORIES */}
         {topCategories.length > 0 && (
