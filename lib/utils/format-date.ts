@@ -10,11 +10,14 @@ export function getMonthRange(year?: number, month?: number): MonthRange {
   const d = year != null && month != null
     ? new Date(year, month, 1)
     : new Date();
-  const start = new Date(d.getFullYear(), d.getMonth(), 1);
-  const end = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+  
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const lastDay = new Date(y, d.getMonth() + 1, 0).getDate();
+  
   return {
-    start: start.toISOString(),
-    end: end.toISOString(),
+    start: `${y}-${m}-01`,
+    end: `${y}-${m}-${String(lastDay).padStart(2, '0')}T23:59:59.999Z`,
   };
 }
 
@@ -56,7 +59,8 @@ export function getSubscriptionOptionsFromPeriod(
     const { start, end } = getMonthRange(prev.getFullYear(), prev.getMonth());
     return { startDate: start, endDate: end };
   }
-  const from = new Date(period.from).toISOString();
-  const to = new Date(period.to + 'T23:59:59.999').toISOString();
-  return { startDate: from, endDate: to };
+  return { 
+    startDate: period.from, 
+    endDate: `${period.to}T23:59:59.999Z` 
+  };
 }
