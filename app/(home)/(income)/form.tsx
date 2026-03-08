@@ -160,8 +160,9 @@ export default function IncomeFormScreen() {
     >
       <KeyboardAvoidingView 
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={headerHeight}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
+        enabled={Platform.OS === 'ios'}
       >
         <ScrollView
           style={styles.scroll}
