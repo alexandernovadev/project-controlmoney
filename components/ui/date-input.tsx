@@ -16,7 +16,6 @@ export type DateInputProps = {
 function formatDisplay(value: string, mode: 'date' | 'datetime'): string {
   if (!value) return '';
   if (mode === 'date') {
-    // Se añade T12:00:00 para forzar el mediodía y evitar saltos de día por zona horaria
     const d = new Date(value.includes('T') ? value : value + 'T12:00:00');
     return d.toLocaleDateString('default', {
       day: 'numeric',
@@ -24,10 +23,29 @@ function formatDisplay(value: string, mode: 'date' | 'datetime'): string {
       year: 'numeric',
     });
   } else {
-    // Datetime mode
     const dt = DateTime.fromISO(value);
     return dt.isValid ? dt.toFormat("MMM d, yyyy 'at' h:mm a") : value;
   }
+}
+
+// Web: convierte ISO → YYYY-MM-DD o YYYY-MM-DDTHH:MM para el input HTML
+function toWebInputValue(iso: string, mode: 'date' | 'datetime'): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, '0');
+  const da = String(d.getDate()).padStart(2, '0');
+  if (mode === 'date') return `${y}-${mo}-${da}`;
+  const h = String(d.getHours()).padStart(2, '0');
+  const mi = String(d.getMinutes()).padStart(2, '0');
+  return `${y}-${mo}-${da}T${h}:${mi}`;
+}
+
+function fromWebInputValue(val: string, mode: 'date' | 'datetime'): string {
+  if (!val) return '';
+  if (mode === 'date') return `${val}T00:00:00.000Z`;
+  return new Date(val).toISOString();
 }
 
 export function DateInput({
@@ -38,11 +56,35 @@ export function DateInput({
   mode = 'date',
 }: DateInputProps) {
   const [showPicker, setShowPicker] = useState<'date' | 'time' | 'datetime' | false>(false);
-  
-  const dateValue = value 
-    ? new Date(mode === 'date' && !value.includes('T') ? value + 'T12:00:00' : value) 
+
+  const dateValue = value
+    ? new Date(mode === 'date' && !value.includes('T') ? value + 'T12:00:00' : value)
     : new Date();
 
+  // ── WEB ──────────────────────────────────────────────────────────────────
+  if (Platform.OS === 'web') {
+    const webValue = toWebInputValue(value, mode);
+    const inputType = mode === 'datetime' ? 'datetime-local' : 'date';
+
+    return (
+      <View style={styles.container}>
+        {label ? <Text style={styles.label}>{label}</Text> : null}
+        {React.createElement(
+          'div',
+          { style: error ? { ...webTrigger, borderColor: Colors.error } : webTrigger },
+          React.createElement('input', {
+            type: inputType,
+            value: webValue,
+            onChange: (e: any) => onChangeValue(fromWebInputValue(e.target.value, mode)),
+            style: webInput,
+          }),
+        )}
+        {error ? <Text style={styles.errorText}>{error}</Text> : null}
+      </View>
+    );
+  }
+
+  // ── NATIVE (iOS / Android) ────────────────────────────────────────────────
   const handleChange = (_: unknown, selectedDate?: Date) => {
     if (Platform.OS === 'android') {
       if (showPicker === 'date') {
@@ -71,7 +113,6 @@ export function DateInput({
         setShowPicker(false);
       }
     } else {
-      // iOS
       if (selectedDate) {
         if (mode === 'date') {
           const year = selectedDate.getFullYear();
@@ -110,7 +151,7 @@ export function DateInput({
         />
       </Pressable>
       {error ? <Text style={styles.errorText}>{error}</Text> : null}
-      
+
       {showPicker && Platform.OS === 'android' && (
         <DateTimePicker
           value={dateValue}
@@ -119,7 +160,7 @@ export function DateInput({
           onChange={handleChange}
         />
       )}
-      
+
       {showPicker && Platform.OS === 'ios' && (
         <View>
           <DateTimePicker
@@ -137,6 +178,33 @@ export function DateInput({
   );
 }
 
+// ── Web styles (plain CSS objects, no StyleSheet) ─────────────────────────
+const webTrigger: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  backgroundColor: Colors.inputBackground,
+  borderRadius: 14,
+  border: `1px solid ${Colors.inputBorder}`,
+  minHeight: 52,
+  paddingLeft: Spacing.md,
+  paddingRight: Spacing.md,
+};
+
+const webInput: React.CSSProperties = {
+  flex: 1,
+  background: 'transparent',
+  border: 'none',
+  outline: 'none',
+  color: Colors.text,
+  fontSize: FontSizes.body,
+  colorScheme: 'dark',
+  cursor: 'pointer',
+  width: '100%',
+  padding: 0,
+};
+
+// ── Native styles ─────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
   container: {
     marginBottom: Spacing.md,
