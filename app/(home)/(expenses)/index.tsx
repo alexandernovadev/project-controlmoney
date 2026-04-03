@@ -1,12 +1,13 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, Pressable, Text, View } from 'react-native';
+import { FlatList, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
 import { ExpenseFilterModal, type ExpenseFilterValues } from '@/components/ui/expense-filter-modal';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
 import { useAuth } from '@/context/auth';
 import { getCategories } from '@/lib/firebase/categories';
 import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
@@ -292,6 +293,8 @@ export default function ExpensesScreen() {
   const [paymentMethodMap, setPaymentMethodMap] = useState<Record<string, string>>({});
 
   const [filterVisible, setFilterVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [filterValues, setFilterValues] = useState<ExpenseFilterValues>(() => ({
     period: 'current',
     amountMin: '',
@@ -365,22 +368,14 @@ export default function ExpensesScreen() {
   const handleAdd = () => router.push('/(home)/(expenses)/form');
   const handleEdit = (id: string) =>
     router.push({ pathname: '/(home)/(expenses)/form', params: { id } });
-  const handleDelete = (item: Transaction) => {
-    Alert.alert(
-      'Eliminar gasto',
-      `¿Eliminar "${item.description || 'este gasto'}"?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            if (!user?.uid) return;
-            await deleteTransaction(user.uid, item.id);
-          },
-        },
-      ]
-    );
+  const handleDelete = (item: Transaction) => setDeleteTarget(item);
+
+  const confirmDelete = async () => {
+    if (!user?.uid || !deleteTarget) return;
+    setDeleting(true);
+    await deleteTransaction(user.uid, deleteTarget.id);
+    setDeleting(false);
+    setDeleteTarget(null);
   };
 
   const handleFilterPress = () => setFilterVisible(true);
@@ -401,6 +396,16 @@ export default function ExpensesScreen() {
 
   return (
     <>
+      <ConfirmModal
+        visible={!!deleteTarget}
+        title="Eliminar gasto"
+        message={`¿Eliminar "${deleteTarget?.description || 'este gasto'}"?`}
+        confirmLabel="Eliminar"
+        destructive
+        loading={deleting}
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteTarget(null)}
+      />
       <ExpenseFilterModal
         visible={filterVisible}
         onClose={() => setFilterVisible(false)}

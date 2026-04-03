@@ -1,13 +1,15 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, Text, View } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
 import { IncomeFilterModal, type IncomeFilterValues } from '@/components/ui/filter-modal';
 import { TransferModal } from '@/components/ui/transfer-modal';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
+import { ActionModal } from '@/components/ui/action-modal';
 import { createTransaction } from '@/lib/firebase/transactions';
 import { useAuth } from '@/context/auth';
 import { getCategories } from '@/lib/firebase/categories';
@@ -114,6 +116,9 @@ export default function IncomeScreen() {
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
   const [filterVisible, setFilterVisible] = useState(false);
   const [transferVisible, setTransferVisible] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
+  const [menuTarget, setMenuTarget] = useState<Transaction | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [filterValues, setFilterValues] = useState<IncomeFilterValues>(() => ({
     period: 'current',
     type: 'all',
@@ -187,35 +192,17 @@ export default function IncomeScreen() {
   const handleAdd = () => router.push('/(home)/(income)/form');
   const handleEdit = (id: string) =>
     router.push({ pathname: '/(home)/(income)/form', params: { id } });
-  const handleDelete = (item: Transaction) => {
-    Alert.alert(
-      'Delete income',
-      `Delete "${item.description || item.source || 'this income'}"?`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            if (!user?.uid) return;
-            await deleteTransaction(user.uid, item.id);
-          },
-        },
-      ]
-    );
+  const handleDelete = (item: Transaction) => setDeleteTarget(item);
+
+  const confirmDelete = async () => {
+    if (!user?.uid || !deleteTarget) return;
+    setDeleting(true);
+    await deleteTransaction(user.uid, deleteTarget.id);
+    setDeleting(false);
+    setDeleteTarget(null);
   };
 
-  const showMenu = (item: Transaction) => {
-    Alert.alert('Income', item.description || item.source || 'Income', [
-      { text: 'Edit', onPress: () => handleEdit(item.id) },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => handleDelete(item),
-      },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  };
+  const showMenu = (item: Transaction) => setMenuTarget(item);
 
   const handleFilterPress = () => setFilterVisible(true);
 
@@ -275,6 +262,34 @@ export default function IncomeScreen() {
 
   return (
     <>
+    <ConfirmModal
+      visible={!!deleteTarget}
+      title="Eliminar ingreso"
+      message={`¿Eliminar "${deleteTarget?.description || deleteTarget?.source || 'este ingreso'}"?`}
+      confirmLabel="Eliminar"
+      destructive
+      loading={deleting}
+      onConfirm={confirmDelete}
+      onCancel={() => setDeleteTarget(null)}
+    />
+    <ActionModal
+      visible={!!menuTarget}
+      title={menuTarget?.description || menuTarget?.source || 'Ingreso'}
+      onClose={() => setMenuTarget(null)}
+      actions={[
+        {
+          label: 'Editar',
+          icon: 'edit',
+          onPress: () => { handleEdit(menuTarget!.id); setMenuTarget(null); },
+        },
+        {
+          label: 'Eliminar',
+          icon: 'delete-outline',
+          destructive: true,
+          onPress: () => { handleDelete(menuTarget!); setMenuTarget(null); },
+        },
+      ]}
+    />
     <IncomeFilterModal
       visible={filterVisible}
       onClose={() => setFilterVisible(false)}

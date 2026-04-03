@@ -1,11 +1,13 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, Text, View } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
+import { ActionModal } from '@/components/ui/action-modal';
 import { useAuth } from '@/context/auth';
 import {
   deleteCategory,
@@ -19,6 +21,9 @@ export default function CategoriesScreen() {
   const insets = useSafeAreaInsets();
   const [categories, setCategories] = useState<Category[]>([]);
   const [search, setSearch] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
+  const [menuTarget, setMenuTarget] = useState<Category | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -38,37 +43,49 @@ export default function CategoriesScreen() {
       pathname: '/(home)/(config)/categories/form',
       params: { id },
     });
-  const handleDelete = (item: Category) => {
-    Alert.alert(
-      'Eliminar categoría',
-      `¿Eliminar "${item.name}"?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            if (!user?.uid) return;
-            await deleteCategory(user.uid, item.id);
-          },
-        },
-      ]
-    );
+  const handleDelete = (item: Category) => setDeleteTarget(item);
+
+  const confirmDelete = async () => {
+    if (!user?.uid || !deleteTarget) return;
+    setDeleting(true);
+    await deleteCategory(user.uid, deleteTarget.id);
+    setDeleting(false);
+    setDeleteTarget(null);
   };
 
-  const showMenu = (item: Category) => {
-    Alert.alert('Categoría', item.name, [
-      { text: 'Editar', onPress: () => handleEdit(item.id) },
-      {
-        text: 'Eliminar',
-        style: 'destructive',
-        onPress: () => handleDelete(item),
-      },
-      { text: 'Cancelar', style: 'cancel' },
-    ]);
-  };
+  const showMenu = (item: Category) => setMenuTarget(item);
 
   return (
+    <>
+    <ConfirmModal
+      visible={!!deleteTarget}
+      title="Eliminar categoría"
+      message={`¿Eliminar "${deleteTarget?.name}"?`}
+      confirmLabel="Eliminar"
+      destructive
+      loading={deleting}
+      onConfirm={confirmDelete}
+      onCancel={() => setDeleteTarget(null)}
+    />
+    <ActionModal
+      visible={!!menuTarget}
+      title={menuTarget?.name ?? ''}
+      subtitle={menuTarget?.type === 'income' ? 'Categoría de ingreso' : 'Categoría de gasto'}
+      onClose={() => setMenuTarget(null)}
+      actions={[
+        {
+          label: 'Editar',
+          icon: 'edit',
+          onPress: () => handleEdit(menuTarget!.id),
+        },
+        {
+          label: 'Eliminar',
+          icon: 'delete-outline',
+          destructive: true,
+          onPress: () => handleDelete(menuTarget!),
+        },
+      ]}
+    />
     <ListPageLayout
       searchValue={search}
       onSearchChange={setSearch}
@@ -123,6 +140,7 @@ export default function CategoriesScreen() {
         )}
       />
     </ListPageLayout>
+    </>
   );
 }
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router } from 'expo-router';
-import { Alert, FlatList, Text, View } from 'react-native';
+import { FlatList, Text, View } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,6 +12,8 @@ import {
 import type { IncomePaymentMethod } from '@/lib/models';
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
+import { ConfirmModal } from '@/components/ui/confirm-modal';
+import { ActionModal } from '@/components/ui/action-modal';
 import { Colors, FontSizes, Spacing } from '@/lib/theme';
 
 export default function IncomePaymentMethodsScreen() {
@@ -19,6 +21,9 @@ export default function IncomePaymentMethodsScreen() {
   const insets = useSafeAreaInsets();
   const [methods, setMethods] = useState<IncomePaymentMethod[]>([]);
   const [search, setSearch] = useState('');
+  const [deleteTarget, setDeleteTarget] = useState<IncomePaymentMethod | null>(null);
+  const [menuTarget, setMenuTarget] = useState<IncomePaymentMethod | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -40,37 +45,50 @@ export default function IncomePaymentMethodsScreen() {
       pathname: '/(home)/(config)/income-payment-methods/form',
       params: { id },
     });
-  const handleDelete = (item: IncomePaymentMethod) => {
-    Alert.alert(
-      'Eliminar método',
-      `¿Eliminar "${item.label}"?`,
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Eliminar',
-          style: 'destructive',
-          onPress: async () => {
-            if (!user?.uid) return;
-            await deleteIncomePaymentMethod(user.uid, item.id);
-          },
-        },
-      ]
-    );
+
+  const handleDelete = (item: IncomePaymentMethod) => setDeleteTarget(item);
+
+  const confirmDelete = async () => {
+    if (!user?.uid || !deleteTarget) return;
+    setDeleting(true);
+    await deleteIncomePaymentMethod(user.uid, deleteTarget.id);
+    setDeleting(false);
+    setDeleteTarget(null);
   };
 
-  const showMenu = (item: IncomePaymentMethod) => {
-    Alert.alert('Método de pago', item.label, [
-      { text: 'Editar', onPress: () => handleEdit(item.id) },
-      {
-        text: 'Eliminar',
-        style: 'destructive',
-        onPress: () => handleDelete(item),
-      },
-      { text: 'Cancelar', style: 'cancel' },
-    ]);
-  };
+  const showMenu = (item: IncomePaymentMethod) => setMenuTarget(item);
 
   return (
+    <>
+    <ConfirmModal
+      visible={!!deleteTarget}
+      title="Eliminar método"
+      message={`¿Eliminar "${deleteTarget?.label}"?`}
+      confirmLabel="Eliminar"
+      destructive
+      loading={deleting}
+      onConfirm={confirmDelete}
+      onCancel={() => setDeleteTarget(null)}
+    />
+    <ActionModal
+      visible={!!menuTarget}
+      title={menuTarget?.label ?? ''}
+      subtitle={menuTarget?.type === 'cash' ? 'Efectivo' : 'Digital'}
+      onClose={() => setMenuTarget(null)}
+      actions={[
+        {
+          label: 'Editar',
+          icon: 'edit',
+          onPress: () => handleEdit(menuTarget!.id),
+        },
+        {
+          label: 'Eliminar',
+          icon: 'delete-outline',
+          destructive: true,
+          onPress: () => handleDelete(menuTarget!),
+        },
+      ]}
+    />
     <ListPageLayout
       searchValue={search}
       onSearchChange={setSearch}
@@ -116,6 +134,7 @@ export default function IncomePaymentMethodsScreen() {
         )}
       />
     </ListPageLayout>
+    </>
   );
 }
 
