@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Image } from 'react-native';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential, signInWithPopup } from 'firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '@/lib/firebase';
 import { Colors, FontSizes, FontWeights, Spacing } from '@/lib/theme';
@@ -50,16 +50,20 @@ export default function LoginScreen() {
     setLoading(true);
     setError('');
     try {
-      await GoogleSignin.hasPlayServices();
-      const response = await GoogleSignin.signIn();
-      
-      if (response.data && response.data.idToken) {
-        const googleCredential = GoogleAuthProvider.credential(response.data.idToken);
-        await signInWithCredential(auth, googleCredential);
-        router.replace('/(home)');
+      if (Platform.OS === 'web') {
+        const provider = new GoogleAuthProvider();
+        await signInWithPopup(auth, provider);
       } else {
-        throw new Error('No se pudo obtener el idToken de Google.');
+        await GoogleSignin.hasPlayServices();
+        const response = await GoogleSignin.signIn();
+        if (response.data && response.data.idToken) {
+          const googleCredential = GoogleAuthProvider.credential(response.data.idToken);
+          await signInWithCredential(auth, googleCredential);
+        } else {
+          throw new Error('No se pudo obtener el idToken de Google.');
+        }
       }
+      router.replace('/(home)');
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Error con Google Sign-In.');
