@@ -12,6 +12,7 @@ export type ListPageLayoutProps = {
   searchPlaceholder?: string;
   onFilterPress?: () => void;
   onAddPress: () => void;
+  onTransferPress?: () => void;
   children: React.ReactNode;
 };
 
@@ -21,6 +22,7 @@ export function ListPageLayout({
   searchPlaceholder = 'Buscar...',
   onFilterPress,
   onAddPress,
+  onTransferPress,
   children,
 }: ListPageLayoutProps) {
   return (
@@ -57,6 +59,17 @@ export function ListPageLayout({
         ) : null}
       </View>
       <View style={styles.list}>{children}</View>
+      {onTransferPress ? (
+        <Pressable
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            onTransferPress();
+          }}
+          style={({ pressed }) => [styles.transferFab, pressed && styles.filterPressed]}
+        >
+          <MaterialIcons name="swap-horiz" size={26} color="#fff" />
+        </Pressable>
+      ) : null}
       <FAB onPress={onAddPress} />
     </View>
   );
@@ -97,5 +110,21 @@ const styles = StyleSheet.create({
   },
   list: {
     flex: 1,
+  },
+  transferFab: {
+    position: 'absolute',
+    bottom: Spacing.xl + 56 + 12,
+    right: Spacing.lg,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: '#AF52DE',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
 });

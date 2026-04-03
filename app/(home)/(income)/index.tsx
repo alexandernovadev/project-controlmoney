@@ -7,6 +7,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ListPageLayout } from '@/components/layout/list-page-layout';
 import { Card } from '@/components/ui/card';
 import { IncomeFilterModal, type IncomeFilterValues } from '@/components/ui/filter-modal';
+import { TransferModal } from '@/components/ui/transfer-modal';
+import { createTransaction } from '@/lib/firebase/transactions';
 import { useAuth } from '@/context/auth';
 import { getCategories } from '@/lib/firebase/categories';
 import { getIncomePaymentMethods } from '@/lib/firebase/income-payment-methods';
@@ -111,6 +113,7 @@ export default function IncomeScreen() {
   >({});
   const [categoryMap, setCategoryMap] = useState<Record<string, string>>({});
   const [filterVisible, setFilterVisible] = useState(false);
+  const [transferVisible, setTransferVisible] = useState(false);
   const [filterValues, setFilterValues] = useState<IncomeFilterValues>(() => ({
     period: 'current',
     type: 'all',
@@ -216,6 +219,41 @@ export default function IncomeScreen() {
 
   const handleFilterPress = () => setFilterVisible(true);
 
+  const handleTransfer = async ({
+    amount,
+    fromMethodId,
+    toMethodId,
+    fromLabel,
+    toLabel,
+  }: {
+    amount: number;
+    fromMethodId: string;
+    toMethodId: string;
+    fromLabel: string;
+    toLabel: string;
+  }) => {
+    if (!user?.uid) return;
+    const description = `Transferencia ${fromLabel} → ${toLabel}`;
+    const date = new Date().toISOString();
+    await Promise.all([
+      createTransaction(user.uid, {
+        type: 'expense',
+        amount,
+        description,
+        date,
+        userId: user.uid,
+      }),
+      createTransaction(user.uid, {
+        type: 'income',
+        amount,
+        description,
+        date,
+        userId: user.uid,
+        paymentMethodId: toMethodId,
+      }),
+    ]);
+  };
+
   const filterLabel = (() => {
     const p = filterValues.period;
     if (p === 'all') return 'Todos los meses';
@@ -230,6 +268,11 @@ export default function IncomeScreen() {
     return `${p.from} – ${p.to}`;
   })();
 
+  const paymentMethodOptions = Object.entries(paymentMethodMap).map(([id, label]) => ({
+    label,
+    value: id,
+  }));
+
   return (
     <>
     <IncomeFilterModal
@@ -238,12 +281,19 @@ export default function IncomeScreen() {
       initialValues={filterValues}
       onApply={setFilterValues}
     />
+    <TransferModal
+      visible={transferVisible}
+      onClose={() => setTransferVisible(false)}
+      paymentMethodOptions={paymentMethodOptions}
+      onConfirm={handleTransfer}
+    />
     <ListPageLayout
       searchValue={search}
       onSearchChange={setSearch}
       searchPlaceholder="Search income..."
       onFilterPress={handleFilterPress}
       onAddPress={handleAdd}
+      onTransferPress={() => setTransferVisible(true)}
     >
       <FlatList
         data={filtered}
