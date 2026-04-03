@@ -37,6 +37,8 @@ export type Transaction = {
 
   // Income
   source?: string;
+
+  // Common (income + expense)
   paymentMethodId?: string;
 
   // Expense

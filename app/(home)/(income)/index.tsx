@@ -229,6 +229,7 @@ export default function IncomeScreen() {
         description,
         date,
         userId: user.uid,
+        paymentMethodId: fromMethodId,
       }),
       createTransaction(user.uid, {
         type: 'income',
