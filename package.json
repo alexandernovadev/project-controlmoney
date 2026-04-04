@@ -1,7 +1,8 @@
 {
   "name": "controlmoneyapp",
   "main": "expo-router/entry",
-  "version": "1.7.7",
+  "version": "2.1.1",
+  "author": "NovaAlex Labs",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
