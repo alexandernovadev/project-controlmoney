@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
-    paddingHorizontal: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
   },
   header: {
     flexDirection: "row",
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
   balanceRow: {
     flexDirection: "row",
     width: "100%",
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xs,
   },
   balanceHalf: {
     flex: 1,
@@ -610,7 +610,7 @@ const styles = StyleSheet.create({
   },
   insightCard: {
     paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xs,
     backgroundColor: Colors.backgroundElevated,
     gap: Spacing.xs,
   },

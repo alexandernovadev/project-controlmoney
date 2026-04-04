@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
 
   },
   scrollContent: {
-    padding: Spacing.md,
+    padding: Spacing.xs,
   },
   section: {
     marginBottom: Spacing.xl,
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: Colors.backgroundElevated,
     borderRadius: 12,
-    padding: Spacing.md,
+    padding: Spacing.xs,
     borderWidth: 1,
     borderColor: Colors.border,
   },

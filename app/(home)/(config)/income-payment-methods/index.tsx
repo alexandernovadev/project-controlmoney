@@ -100,7 +100,7 @@ export default function IncomePaymentMethodsScreen() {
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{
-          paddingHorizontal: Spacing.md,
+          paddingHorizontal: Spacing.xs,
           paddingBottom: insets.bottom + 80,
           gap: Spacing.sm,
         }}

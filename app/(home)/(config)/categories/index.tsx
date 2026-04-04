@@ -97,7 +97,7 @@ export default function CategoriesScreen() {
         data={filtered}
         keyExtractor={(item) => item.id}
         contentContainerStyle={{
-          paddingHorizontal: Spacing.md,
+          paddingHorizontal: Spacing.xs,
           paddingBottom: insets.bottom + 80,
           gap: Spacing.sm,
         }}

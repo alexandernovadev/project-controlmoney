@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   content: {
-    padding: Spacing.lg,
+    padding: Spacing.xs,
   },
   pageTitle: {
     marginBottom: Spacing.lg,

@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   scrollContent: {
-    padding: Spacing.lg,
+    padding: Spacing.xs,
   },
   header: {
     alignItems: 'center',
@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
   },
   infoCard: {
-    padding: Spacing.md,
+    padding: Spacing.xs,
     marginBottom: Spacing['2xl'],
   },
   infoRow: {

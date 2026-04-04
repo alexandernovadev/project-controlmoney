@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingTop: Spacing.xl,
     paddingBottom: Spacing.lg,
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xs,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
   },
@@ -231,11 +231,8 @@ const styles = StyleSheet.create({
 
   // Content
   content: {
-    padding: Spacing.lg,
+    padding: Spacing.xs,
     gap: Spacing.md,
-    maxWidth: 600,
-    width: '100%',
-    alignSelf: 'center',
   },
   sectionCard: {
     backgroundColor: Colors.backgroundCard,
@@ -251,7 +248,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xs,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
     gap: Spacing.md,

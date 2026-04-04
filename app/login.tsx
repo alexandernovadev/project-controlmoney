@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   formContainer: {
-    padding: Spacing.xl,
+    padding: Spacing.xs,
     width: '100%',
     maxWidth: 450,
     alignSelf: 'center',
@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     color: Colors.textSecondary,
-    paddingHorizontal: Spacing.md,
+    paddingHorizontal: Spacing.xs,
     fontSize: FontSizes.bodySm,
   },
   googleButton: {
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     textAlign: 'center',
     backgroundColor: Colors.errorMuted,
-    padding: Spacing.sm,
+    padding: Spacing.xs,
     borderRadius: 8,
     overflow: 'hidden',
   },

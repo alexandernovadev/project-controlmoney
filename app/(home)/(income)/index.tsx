@@ -41,7 +41,7 @@ function IncomeCard({ item, paymentMethodLabel, categoryLabel, onView, onEdit, o
   return (
     <Card
       padding="sm"
-      style={{ borderLeftWidth: 2, paddingHorizontal: Spacing.sm, paddingVertical: Spacing.sm }}
+      style={{ borderLeftWidth: 2, paddingHorizontal: Spacing.xs, paddingVertical: Spacing.sm }}
     >
       <View style={cardStyles.container}>
         {/* Row 1: Description */}
@@ -338,7 +338,7 @@ export default function IncomeScreen() {
         keyExtractor={(item) => item.id}
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingHorizontal: Spacing.md,
+          paddingHorizontal: Spacing.xs,
           paddingBottom: insets.bottom + 80,
         }}
         ListHeaderComponent={
@@ -429,7 +429,7 @@ const headerStyles = {
   },
   card: {
     borderRadius: 16,
-    padding: Spacing.sm,
+    padding: Spacing.xs,
     borderWidth: 1,
   },
   cardHalf: {

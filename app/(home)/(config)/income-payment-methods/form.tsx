@@ -195,6 +195,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: Spacing.lg,
+    padding: Spacing.xs,
   },
 });
