@@ -30,9 +30,21 @@ function FieldRow({ icon, label, value, accent }: FieldRowProps) {
         </View>
         <Text style={styles.rowLabel}>{label}</Text>
       </View>
-      <Text style={[styles.rowValue, accent && { color: accent }]} numberOfLines={3}>
-        {value}
-      </Text>
+      <Text style={[styles.rowValue, accent && { color: accent }]}>{value}</Text>
+    </View>
+  );
+}
+
+function FieldBlock({ icon, label, value }: { icon: keyof typeof MaterialIcons.glyphMap; label: string; value: string }) {
+  return (
+    <View style={styles.block}>
+      <View style={styles.rowLeft}>
+        <View style={styles.rowIcon}>
+          <MaterialIcons name={icon} size={18} color={Colors.textSecondary} />
+        </View>
+        <Text style={styles.rowLabel}>{label}</Text>
+      </View>
+      <Text style={styles.blockValue}>{value}</Text>
     </View>
   );
 }
@@ -61,7 +73,7 @@ export default function ExpenseViewScreen() {
     ]).then(([tx, categories, methods]) => {
       setTransaction(tx);
       if (tx) {
-        navigation.setOptions({ title: tx.description || 'Gasto' });
+        navigation.setOptions({ title: tx.description || 'Expense' });
         if (tx.categoryId)
           setCategoryName(categories.find((c) => c.id === tx.categoryId)?.name ?? '');
         if (tx.paymentMethodId)
@@ -82,7 +94,7 @@ export default function ExpenseViewScreen() {
   if (!transaction) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.emptyText}>Gasto no encontrado.</Text>
+        <Text style={styles.emptyText}>Expense not found.</Text>
       </View>
     );
   }
@@ -114,59 +126,59 @@ export default function ExpenseViewScreen() {
       </View>
 
       <View style={styles.content}>
-        {/* Info básica */}
+        {/* General */}
         <SectionCard>
           {categoryName ? (
-            <FieldRow icon="label-outline" label="Categoría" value={categoryName} />
+            <FieldRow icon="label-outline" label="Category" value={categoryName} />
           ) : null}
           {paymentMethodName ? (
-            <FieldRow icon="account-balance-wallet" label="Método de pago" value={paymentMethodName} accent={Colors.accent} />
+            <FieldRow icon="account-balance-wallet" label="Payment method" value={paymentMethodName} accent={Colors.accent} />
           ) : null}
           {transaction.brand ? (
-            <FieldRow icon="storefront" label="Marca" value={transaction.brand} />
+            <FieldRow icon="storefront" label="Brand" value={transaction.brand} />
           ) : null}
-          <FieldRow icon="event" label="Fecha" value={formatDateShort(transaction.date)} />
+          <FieldRow icon="event" label="Date" value={formatDateShort(transaction.date)} />
         </SectionCard>
 
-        {/* Tienda */}
+        {/* Store */}
         {hasStoreInfo ? (
           <SectionCard>
-            {storeName ? <FieldRow icon="store" label="Tienda" value={storeName} /> : null}
-            {storeAddress ? <FieldRow icon="place" label="Dirección" value={storeAddress} /> : null}
-            {storeCountry ? <FieldRow icon="flag" label="País" value={storeCountry} /> : null}
+            {storeName ? <FieldRow icon="store" label="Store" value={storeName} /> : null}
+            {storeAddress ? <FieldRow icon="place" label="Address" value={storeAddress} /> : null}
+            {storeCountry ? <FieldRow icon="flag" label="Country" value={storeCountry} /> : null}
             {storeLat != null && storeLng != null ? (
               <FieldRow
                 icon="my-location"
-                label="Coordenadas"
+                label="Coordinates"
                 value={`${storeLat.toFixed(5)}, ${storeLng.toFixed(5)}`}
               />
             ) : null}
           </SectionCard>
         ) : null}
 
-        {/* Cantidad */}
+        {/* Quantity */}
         {hasQtyInfo ? (
           <SectionCard>
             {transaction.quantity != null ? (
-              <FieldRow icon="format-list-numbered" label="Cantidad" value={String(transaction.quantity)} />
+              <FieldRow icon="format-list-numbered" label="Quantity" value={String(transaction.quantity)} />
             ) : null}
             {transaction.unit ? (
-              <FieldRow icon="straighten" label="Unidad" value={transaction.unit} />
+              <FieldRow icon="straighten" label="Unit" value={transaction.unit} />
             ) : null}
             {transaction.unitPrice != null ? (
-              <FieldRow icon="sell" label="Precio unitario" value={`$${formatAmountNumber(transaction.unitPrice)}`} />
+              <FieldRow icon="sell" label="Unit price" value={`$${formatAmountNumber(transaction.unitPrice)}`} />
             ) : null}
             {transaction.quantity != null && transaction.quantity > 1 ? (
               <FieldRow
                 icon="calculate"
-                label="Precio c/u"
+                label="Price each"
                 value={`$${formatAmountNumber(transaction.amount / transaction.quantity)}`}
               />
             ) : null}
           </SectionCard>
         ) : null}
 
-        {/* Notas */}
+        {/* Notes */}
         {hasNotes ? (
           <SectionCard>
             {transaction.rating != null ? (
@@ -178,7 +190,7 @@ export default function ExpenseViewScreen() {
               />
             ) : null}
             {transaction.comment?.trim() ? (
-              <FieldRow icon="chat-bubble-outline" label="Comentario" value={transaction.comment.trim()} />
+              <FieldBlock icon="chat-bubble-outline" label="Comment" value={transaction.comment.trim()} />
             ) : null}
           </SectionCard>
         ) : null}
@@ -242,7 +254,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
 
-  // Row
+  // Row (inline label + value)
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -277,5 +289,21 @@ const styles = StyleSheet.create({
     color: Colors.text,
     flex: 1,
     textAlign: 'right',
+  },
+
+  // Block (label on top, value below)
+  block: {
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.xs,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    gap: Spacing.xs,
+  },
+  blockValue: {
+    fontSize: FontSizes.body,
+    fontWeight: '500',
+    color: Colors.text,
+    paddingLeft: 32 + Spacing.sm,
+    lineHeight: FontSizes.body * 1.5,
   },
 });

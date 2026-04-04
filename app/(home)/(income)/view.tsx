@@ -42,10 +42,7 @@ function FieldRow({ icon, label, value, accent }: FieldRowProps) {
         </View>
         <Text style={styles.rowLabel}>{label}</Text>
       </View>
-      <Text
-        style={[styles.rowValue, accent && { color: accent }]}
-        numberOfLines={3}
-      >
+      <Text style={[styles.rowValue, accent && { color: accent }]}>
         {value}
       </Text>
     </View>
@@ -73,7 +70,7 @@ export default function IncomeViewScreen() {
       setTransaction(tx);
       if (tx) {
         navigation.setOptions({
-          title: tx.description || tx.source || "Ingreso",
+          title: tx.description || tx.source || "Income",
         });
         if (tx.categoryId)
           setCategoryName(
@@ -99,7 +96,7 @@ export default function IncomeViewScreen() {
   if (!transaction) {
     return (
       <View style={styles.centered}>
-        <Text style={styles.emptyText}>Ingreso no encontrado.</Text>
+        <Text style={styles.emptyText}>Income not found.</Text>
       </View>
     );
   }
@@ -128,24 +125,24 @@ export default function IncomeViewScreen() {
           {categoryName ? (
             <FieldRow
               icon="label-outline"
-              label="Categoría"
+              label="Category"
               value={categoryName}
             />
           ) : null}
           {paymentMethodName ? (
             <FieldRow
               icon="account-balance-wallet"
-              label="Método de pago"
+              label="Payment method"
               value={paymentMethodName}
               accent={Colors.accent}
             />
           ) : null}
           {transaction.source ? (
-            <FieldRow icon="input" label="Fuente" value={transaction.source} />
+            <FieldRow icon="input" label="Source" value={transaction.source} />
           ) : null}
           <FieldRow
             icon="event"
-            label="Fecha"
+            label="Date"
             value={formatDateShort(transaction.date)}
           />
         </View>
