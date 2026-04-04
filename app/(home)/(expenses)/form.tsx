@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Collapsible } from '@/components/ui/collapsible';
 import { DateInput } from '@/components/ui/date-input';
 import { Input } from '@/components/ui/input';
+import { SuggestInput } from '@/components/ui/suggest-input';
+import { useFieldSuggestions } from '@/lib/hooks/useFieldSuggestions';
 import { SelectModal } from '@/components/ui/select-modal';
 import type { SelectOption } from '@/components/ui/select-modal';
 import { useAuth } from '@/context/auth';
@@ -75,6 +77,7 @@ export default function ExpenseFormScreen() {
     control,
     handleSubmit,
     reset,
+    watch,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -97,6 +100,16 @@ export default function ExpenseFormScreen() {
       date: new Date().toISOString(),
     },
   });
+
+  const brandValue = watch('brand');
+  const storeValue = watch('store');
+  const descriptionValue = watch('description');
+  const { brandSuggestions, storeSuggestions, descriptionSuggestions } = useFieldSuggestions(
+    user?.uid,
+    brandValue,
+    storeValue,
+    descriptionValue
+  );
 
   useEffect(() => {
     if (!user?.uid) return;
@@ -258,12 +271,14 @@ export default function ExpenseFormScreen() {
           control={control}
           name="description"
           render={({ field: { onChange, value } }) => (
-            <Input
+            <SuggestInput
               label="Description"
               value={value}
               onChangeText={onChange}
               placeholder="e.g. Supermarket, Cinema"
               error={errors.description?.message}
+              suggestions={descriptionSuggestions}
+              onSelectSuggestion={onChange}
             />
           )}
         />
@@ -271,12 +286,14 @@ export default function ExpenseFormScreen() {
           control={control}
           name="brand"
           render={({ field: { onChange, value } }) => (
-            <Input
+            <SuggestInput
               label="Brand"
               value={value}
               onChangeText={onChange}
               placeholder="e.g. Nike, Apple"
               error={errors.brand?.message}
+              suggestions={brandSuggestions}
+              onSelectSuggestion={onChange}
             />
           )}
         />
@@ -345,12 +362,14 @@ export default function ExpenseFormScreen() {
           control={control}
           name="store"
           render={({ field: { onChange, value } }) => (
-            <Input
+            <SuggestInput
               label="Store"
               value={value}
               onChangeText={onChange}
               placeholder="e.g. Walmart, Netflix"
               error={errors.store?.message}
+              suggestions={storeSuggestions}
+              onSelectSuggestion={onChange}
             />
           )}
         />

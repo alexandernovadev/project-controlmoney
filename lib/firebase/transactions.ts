@@ -19,6 +19,7 @@ import {
   type Timestamp,
 } from 'firebase/firestore';
 import { db } from './config';
+import { upsertSuggestion } from './suggestions';
 import { toStorageISO } from '@/lib/utils/format-date';
 import type {
   Transaction,
@@ -83,6 +84,11 @@ export async function createTransaction(
   const ref = await addDoc(transactionsRef(userId), payload);
   const tx = await getTransaction(userId, ref.id);
   if (!tx) throw new Error('Failed to fetch created transaction');
+
+  if (data.brand) upsertSuggestion(userId, 'brands', data.brand);
+  if (typeof data.store === 'string' && data.store) upsertSuggestion(userId, 'stores', data.store);
+  if (data.description) upsertSuggestion(userId, 'descriptions', data.description);
+
   return tx;
 }
 
@@ -128,6 +134,10 @@ export async function updateTransaction(
     updatedAt: new Date().toISOString(),
   });
   await updateDoc(ref, payload);
+
+  if (data.brand) upsertSuggestion(userId, 'brands', data.brand);
+  if (typeof data.store === 'string' && data.store) upsertSuggestion(userId, 'stores', data.store);
+  if (data.description) upsertSuggestion(userId, 'descriptions', data.description);
 }
 
 export async function deleteTransaction(
