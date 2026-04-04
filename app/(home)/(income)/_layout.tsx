@@ -16,6 +16,10 @@ export default function IncomeLayout() {
         name="form"
         options={{ title: 'Add income', presentation: 'modal' }}
       />
+      <Stack.Screen
+        name="view"
+        options={{ title: '' }}
+      />
     </Stack>
   );
 }

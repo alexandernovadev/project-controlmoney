@@ -25,6 +25,7 @@ type ExpenseCardProps = {
   item: Transaction;
   categoryLabel?: string;
   paymentMethodLabel?: string;
+  onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
 };
@@ -33,6 +34,7 @@ function ExpenseCard({
   item,
   categoryLabel,
   paymentMethodLabel,
+  onView,
   onEdit,
   onDelete,
 }: ExpenseCardProps) {
@@ -172,6 +174,17 @@ function ExpenseCard({
         {!hasExpandedContent && <View style={[cardStyles.divider, { marginBottom: 4 }]} />}
         
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 2 }}>
+          <Pressable
+            onPress={onView}
+            style={({ pressed }) => [
+              cardStyles.actionButton,
+              pressed && { opacity: 0.8 },
+            ]}
+          >
+            <MaterialIcons name="visibility" size={18} color={Colors.textSecondary} />
+            <Text style={[cardStyles.editButtonText, { color: Colors.textSecondary }]}>Ver</Text>
+          </Pressable>
+
           <Pressable
             onPress={onEdit}
             style={({ pressed }) => [
@@ -366,6 +379,8 @@ export default function ExpensesScreen() {
   const total = calculateTotal(filtered);
 
   const handleAdd = () => router.push('/(home)/(expenses)/form');
+  const handleView = (id: string) =>
+    router.push({ pathname: '/(home)/(expenses)/view', params: { id } });
   const handleEdit = (id: string) =>
     router.push({ pathname: '/(home)/(expenses)/form', params: { id } });
   const handleDelete = (item: Transaction) => setDeleteTarget(item);
@@ -457,6 +472,7 @@ export default function ExpensesScreen() {
                 item={item}
                 categoryLabel={item.categoryId ? categoryMap[item.categoryId] : undefined}
                 paymentMethodLabel={item.paymentMethodId ? paymentMethodMap[item.paymentMethodId] : undefined}
+                onView={() => handleView(item.id)}
                 onEdit={() => handleEdit(item.id)}
                 onDelete={() => handleDelete(item)}
               />

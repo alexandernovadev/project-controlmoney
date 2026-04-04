@@ -1,7 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { FlatList, Text, View } from 'react-native';
+import { FlatList, Pressable, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ListPageLayout } from '@/components/layout/list-page-layout';
@@ -9,7 +9,6 @@ import { Card } from '@/components/ui/card';
 import { IncomeFilterModal, type IncomeFilterValues } from '@/components/ui/filter-modal';
 import { TransferModal } from '@/components/ui/transfer-modal';
 import { ConfirmModal } from '@/components/ui/confirm-modal';
-import { ActionModal } from '@/components/ui/action-modal';
 import { createTransaction } from '@/lib/firebase/transactions';
 import { useAuth } from '@/context/auth';
 import { getCategories } from '@/lib/firebase/categories';
@@ -28,11 +27,12 @@ type IncomeCardProps = {
   item: Transaction;
   paymentMethodLabel?: string;
   categoryLabel?: string;
-  onPress: () => void;
-  onLongPress: () => void;
+  onView: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
 };
 
-function IncomeCard({ item, paymentMethodLabel, categoryLabel, onPress, onLongPress }: IncomeCardProps) {
+function IncomeCard({ item, paymentMethodLabel, categoryLabel, onView, onEdit, onDelete }: IncomeCardProps) {
   const subtitleParts = [
     categoryLabel ?? paymentMethodLabel ?? item.source ?? null,
   ].filter(Boolean);
@@ -40,8 +40,6 @@ function IncomeCard({ item, paymentMethodLabel, categoryLabel, onPress, onLongPr
 
   return (
     <Card
-      onPress={onPress}
-      onLongPress={onLongPress}
       padding="sm"
       style={{ borderLeftWidth: 2, paddingHorizontal: 12, paddingVertical: 10 }}
     >
@@ -50,13 +48,11 @@ function IncomeCard({ item, paymentMethodLabel, categoryLabel, onPress, onLongPr
         <Text style={cardStyles.title}>
           {item.description || item.source || 'Income'}
         </Text>
-        
-        {/* Row 2: Category and Price */}
+
+        {/* Row 2: Subtitle and Price */}
         <View style={cardStyles.middleRow}>
           {subtitle ? (
-            <Text style={cardStyles.subtitle}>
-              {subtitle}
-            </Text>
+            <Text style={cardStyles.subtitle}>{subtitle}</Text>
           ) : <View style={{ flex: 1 }} />}
           <Text style={[cardStyles.amount, { color: Colors.success }]}>
             +${formatAmountNumber(item.amount)}
@@ -64,9 +60,33 @@ function IncomeCard({ item, paymentMethodLabel, categoryLabel, onPress, onLongPr
         </View>
 
         {/* Row 3: Date */}
-        <Text style={cardStyles.date}>
-          {formatDateShort(item.date)}
-        </Text>
+        <Text style={cardStyles.date}>{formatDateShort(item.date)}</Text>
+
+        {/* Row 4: Actions */}
+        <View style={cardStyles.divider} />
+        <View style={cardStyles.actions}>
+          <Pressable
+            onPress={onView}
+            style={({ pressed }) => [cardStyles.actionBtn, pressed && { opacity: 0.7 }]}
+          >
+            <MaterialIcons name="visibility" size={18} color={Colors.textSecondary} />
+            <Text style={[cardStyles.actionText, { color: Colors.textSecondary }]}>Ver</Text>
+          </Pressable>
+          <Pressable
+            onPress={onEdit}
+            style={({ pressed }) => [cardStyles.actionBtn, pressed && { opacity: 0.7 }]}
+          >
+            <MaterialIcons name="edit" size={18} color={Colors.accent} />
+            <Text style={[cardStyles.actionText, { color: Colors.accent }]}>Editar</Text>
+          </Pressable>
+          <Pressable
+            onPress={onDelete}
+            style={({ pressed }) => [cardStyles.actionBtn, pressed && { opacity: 0.7 }]}
+          >
+            <MaterialIcons name="delete-outline" size={18} color={Colors.error} />
+            <Text style={[cardStyles.actionText, { color: Colors.error }]}>Eliminar</Text>
+          </Pressable>
+        </View>
       </View>
     </Card>
   );
@@ -102,6 +122,27 @@ const cardStyles = {
     fontSize: FontSizes.bodyLg,
     fontWeight: '700' as const,
   },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  actions: {
+    flexDirection: 'row' as const,
+    justifyContent: 'flex-end' as const,
+    gap: 12,
+  },
+  actionBtn: {
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: 4,
+    paddingVertical: 4,
+  },
+  actionText: {
+    fontSize: FontSizes.bodySm,
+    fontWeight: '500' as const,
+  },
 };
 
 export default function IncomeScreen() {
@@ -117,7 +158,6 @@ export default function IncomeScreen() {
   const [filterVisible, setFilterVisible] = useState(false);
   const [transferVisible, setTransferVisible] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
-  const [menuTarget, setMenuTarget] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [filterValues, setFilterValues] = useState<IncomeFilterValues>(() => ({
     period: 'current',
@@ -190,6 +230,8 @@ export default function IncomeScreen() {
   }).filter(m => m.total > 0);
 
   const handleAdd = () => router.push('/(home)/(income)/form');
+  const handleView = (id: string) =>
+    router.push({ pathname: '/(home)/(income)/view', params: { id } });
   const handleEdit = (id: string) =>
     router.push({ pathname: '/(home)/(income)/form', params: { id } });
   const handleDelete = (item: Transaction) => setDeleteTarget(item);
@@ -201,8 +243,6 @@ export default function IncomeScreen() {
     setDeleting(false);
     setDeleteTarget(null);
   };
-
-  const showMenu = (item: Transaction) => setMenuTarget(item);
 
   const handleFilterPress = () => setFilterVisible(true);
 
@@ -273,24 +313,6 @@ export default function IncomeScreen() {
       onConfirm={confirmDelete}
       onCancel={() => setDeleteTarget(null)}
     />
-    <ActionModal
-      visible={!!menuTarget}
-      title={menuTarget?.description || menuTarget?.source || 'Ingreso'}
-      onClose={() => setMenuTarget(null)}
-      actions={[
-        {
-          label: 'Editar',
-          icon: 'edit',
-          onPress: () => { handleEdit(menuTarget!.id); setMenuTarget(null); },
-        },
-        {
-          label: 'Eliminar',
-          icon: 'delete-outline',
-          destructive: true,
-          onPress: () => { handleDelete(menuTarget!); setMenuTarget(null); },
-        },
-      ]}
-    />
     <IncomeFilterModal
       visible={filterVisible}
       onClose={() => setFilterVisible(false)}
@@ -356,8 +378,9 @@ export default function IncomeScreen() {
               item={item}
               paymentMethodLabel={item.paymentMethodId ? paymentMethodMap[item.paymentMethodId] : undefined}
               categoryLabel={item.categoryId ? categoryMap[item.categoryId] : undefined}
-              onPress={() => handleEdit(item.id)}
-              onLongPress={() => showMenu(item)}
+              onView={() => handleView(item.id)}
+              onEdit={() => handleEdit(item.id)}
+              onDelete={() => handleDelete(item)}
             />
           </View>
         )}

@@ -16,6 +16,10 @@ export default function ExpensesLayout() {
         name="form"
         options={{ title: 'Add expense', presentation: 'modal' }}
       />
+      <Stack.Screen
+        name="view"
+        options={{ title: '' }}
+      />
     </Stack>
   );
 }
