@@ -73,7 +73,7 @@ export default function ExpenseViewScreen() {
     ]).then(([tx, categories, methods]) => {
       setTransaction(tx);
       if (tx) {
-        navigation.setOptions({ title: tx.description || 'Expense' });
+        navigation.setOptions({ title: '' });
         if (tx.categoryId)
           setCategoryName(categories.find((c) => c.id === tx.categoryId)?.name ?? '');
         if (tx.paymentMethodId)
@@ -118,6 +118,7 @@ export default function ExpenseViewScreen() {
     >
       {/* Hero */}
       <View style={styles.hero}>
+        <Text style={styles.heroTitle}>{transaction.description}</Text>
         <Text style={styles.heroAmount}>-${formatAmountNumber(transaction.amount)}</Text>
         <View style={styles.heroMeta}>
           <MaterialIcons name="event" size={14} color={Colors.textSecondary} />
@@ -223,6 +224,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xs,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+  },
+  heroTitle: {
+    fontSize: FontSizes.h2,
+    fontWeight: '700',
+    color: Colors.text,
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
   },
   heroAmount: {
     fontSize: 48,

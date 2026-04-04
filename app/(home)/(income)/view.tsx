@@ -69,9 +69,7 @@ export default function IncomeViewScreen() {
     ]).then(([tx, categories, methods]) => {
       setTransaction(tx);
       if (tx) {
-        navigation.setOptions({
-          title: tx.description || tx.source || "Income",
-        });
+        navigation.setOptions({ title: '' });
         if (tx.categoryId)
           setCategoryName(
             categories.find((c) => c.id === tx.categoryId)?.name ?? "",
@@ -109,6 +107,9 @@ export default function IncomeViewScreen() {
     >
       {/* Hero */}
       <View style={styles.hero}>
+        <Text style={styles.heroTitle}>
+          {transaction.description || transaction.source}
+        </Text>
         <Text style={styles.heroAmount}>
           +${formatAmountNumber(transaction.amount)}
         </Text>
@@ -173,6 +174,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xs,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+  },
+  heroTitle: {
+    fontSize: FontSizes.h2,
+    fontWeight: "700",
+    color: Colors.text,
+    textAlign: "center",
+    marginBottom: Spacing.sm,
   },
   heroAmount: {
     fontSize: 48,
