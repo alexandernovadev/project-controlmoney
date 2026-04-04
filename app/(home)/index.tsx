@@ -39,7 +39,7 @@ export default function HomeScreen() {
   
   // Filter state (only using period for home)
   const [filterVisible, setFilterVisible] = useState(false);
-  const [period, setPeriod] = useState<IncomeFilterValues['period']>('current');
+  const [period, setPeriod] = useState<IncomeFilterValues['period']>('all');
 
   // Refresh state
   const [refreshing, setRefreshing] = useState(false);

@@ -160,7 +160,7 @@ export default function IncomeScreen() {
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [filterValues, setFilterValues] = useState<IncomeFilterValues>(() => ({
-    period: 'current',
+    period: 'all',
     type: 'all',
     amountMin: '',
     amountMax: '',

@@ -97,7 +97,7 @@ export function ExpenseFilterModal({
   const handleClear = () => {
     const now = new Date();
     const { start, end } = getMonthRange(now.getFullYear(), now.getMonth());
-    setPeriod('current');
+    setPeriod('all');
     setAmountMin('');
     setAmountMax('');
     setCategoryIds([]);
@@ -105,7 +105,7 @@ export function ExpenseFilterModal({
     setDateFrom(start);
     setDateTo(end);
     onApply({
-      period: 'current',
+      period: 'all',
       amountMin: '',
       amountMax: '',
       categoryIds: [],

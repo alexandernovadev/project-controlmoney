@@ -309,7 +309,7 @@ export default function ExpensesScreen() {
   const [deleteTarget, setDeleteTarget] = useState<Transaction | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [filterValues, setFilterValues] = useState<ExpenseFilterValues>(() => ({
-    period: 'current',
+    period: 'all',
     amountMin: '',
     amountMax: '',
     categoryIds: [],

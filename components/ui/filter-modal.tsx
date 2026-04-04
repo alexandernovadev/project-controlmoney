@@ -103,7 +103,7 @@ export function IncomeFilterModal({
     setDateFrom(start);
     setDateTo(end);
     onApply({
-      period: 'current',
+      period: 'all',
       type: 'all',
       amountMin: '',
       amountMax: '',
