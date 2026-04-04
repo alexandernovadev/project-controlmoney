@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, KeyboardAvoidingView, Platform, ActivityIndicator, Image } from 'react-native';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithCredential, signInWithPopup } from 'firebase/auth';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { auth } from '@/lib/firebase';
 import { Colors, FontSizes, FontWeights, Spacing } from '@/lib/theme';
 import { Button, Input } from '@/components/ui';
 import { ThemedView } from '@/components/themed-view';
 import { useRouter } from 'expo-router';
 
-// Configure Google Sign-in using webClientId from google-services.json
-GoogleSignin.configure({
-  webClientId: '441923672949-01lt4oa6399n6bes5l2cjhjkimjefjhb.apps.googleusercontent.com',
-});
+// Lazy import — el módulo nativo no existe en Expo Go ni en web
+let GoogleSignin: any = null;
+if (Platform.OS !== 'web') {
+  try {
+    GoogleSignin = require('@react-native-google-signin/google-signin').GoogleSignin;
+    GoogleSignin.configure({
+      webClientId: '441923672949-01lt4oa6399n6bes5l2cjhjkimjefjhb.apps.googleusercontent.com',
+    });
+  } catch {
+    // Expo Go — Google Sign-In no disponible
+  }
+}
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -53,7 +60,7 @@ export default function LoginScreen() {
       if (Platform.OS === 'web') {
         const provider = new GoogleAuthProvider();
         await signInWithPopup(auth, provider);
-      } else {
+      } else if (GoogleSignin) {
         await GoogleSignin.hasPlayServices();
         const response = await GoogleSignin.signIn();
         if (response.data && response.data.idToken) {
@@ -62,6 +69,8 @@ export default function LoginScreen() {
         } else {
           throw new Error('No se pudo obtener el idToken de Google.');
         }
+      } else {
+        throw new Error('Google Sign-In no está disponible en este entorno.');
       }
       router.replace('/(home)');
     } catch (err: any) {
