@@ -41,7 +41,7 @@ function IncomeCard({ item, paymentMethodLabel, categoryLabel, onView, onEdit, o
   return (
     <Card
       padding="sm"
-      style={{ borderLeftWidth: 2, paddingHorizontal: 12, paddingVertical: 10 }}
+      style={{ borderLeftWidth: 2, paddingHorizontal: Spacing.sm, paddingVertical: Spacing.sm }}
     >
       <View style={cardStyles.container}>
         {/* Row 1: Description */}
@@ -95,7 +95,7 @@ function IncomeCard({ item, paymentMethodLabel, categoryLabel, onView, onEdit, o
 const cardStyles = {
   container: {
     flexDirection: 'column' as const,
-    gap: 2,
+    gap: Spacing.xs,
   },
   middleRow: {
     flexDirection: 'row' as const,
@@ -111,7 +111,7 @@ const cardStyles = {
     fontSize: FontSizes.caption,
     color: Colors.textSecondary,
     flex: 1,
-    paddingRight: 8,
+    paddingRight: Spacing.sm,
   },
   date: {
     fontSize: FontSizes.caption,
@@ -125,19 +125,19 @@ const cardStyles = {
   divider: {
     height: 1,
     backgroundColor: Colors.border,
-    marginTop: 8,
-    marginBottom: 4,
+    marginTop: Spacing.sm,
+    marginBottom: Spacing.xs,
   },
   actions: {
     flexDirection: 'row' as const,
     justifyContent: 'flex-end' as const,
-    gap: 12,
+    gap: Spacing.sm,
   },
   actionBtn: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    gap: 4,
-    paddingVertical: 4,
+    gap: Spacing.xs,
+    paddingVertical: Spacing.xs,
   },
   actionText: {
     fontSize: FontSizes.bodySm,
@@ -439,7 +439,7 @@ const headerStyles = {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
     gap: Spacing.xs,
-    marginBottom: 2,
+    marginBottom: Spacing.xs,
   },
   label: {
     fontSize: FontSizes.caption,

@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
   heroMeta: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.xs,
     marginTop: Spacing.xs,
   },
   heroDate: {
@@ -163,6 +163,9 @@ const styles = StyleSheet.create({
   content: {
     padding: Spacing.lg,
     gap: Spacing.md,
+    maxWidth: 600,
+    width: '100%',
+    alignSelf: 'center',
   },
   sectionCard: {
     backgroundColor: Colors.backgroundCard,
@@ -175,7 +178,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 14,
+    paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,

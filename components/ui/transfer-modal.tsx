@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   arrowWrap: {
-    paddingBottom: 18,
+    paddingBottom: Spacing.md,
   },
   errorText: {
     fontSize: FontSizes.caption,

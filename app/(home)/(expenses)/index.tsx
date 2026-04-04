@@ -57,7 +57,7 @@ function ExpenseCard({
   return (
     <Card
       padding="sm"
-      style={{ borderLeftWidth: 2, paddingHorizontal: 12, paddingVertical: 10 }}
+      style={{ borderLeftWidth: 2, paddingHorizontal: Spacing.sm, paddingVertical: Spacing.sm }}
     >
       <View style={cardStyles.container}>
         {/* Row 1: Description */}
@@ -171,9 +171,9 @@ function ExpenseCard({
         )}
         
         {/* Siempre mostramos los botones, con su divisor si no hay contenido expandido para no pegar los botones a la fecha */}
-        {!hasExpandedContent && <View style={[cardStyles.divider, { marginBottom: 4 }]} />}
-        
-        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 2 }}>
+        {!hasExpandedContent && <View style={[cardStyles.divider, { marginBottom: Spacing.xs }]} />}
+
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-end', gap: Spacing.sm, marginTop: Spacing.xs }}>
           <Pressable
             onPress={onView}
             style={({ pressed }) => [
@@ -215,7 +215,7 @@ function ExpenseCard({
 const cardStyles = {
   container: {
     flexDirection: 'column' as const,
-    gap: 2,
+    gap: Spacing.xs,
   },
   middleRow: {
     flexDirection: 'row' as const,
@@ -246,7 +246,7 @@ const cardStyles = {
     fontSize: FontSizes.caption,
     color: Colors.textSecondary,
     flex: 1,
-    paddingRight: 8,
+    paddingRight: Spacing.sm,
   },
   date: {
     fontSize: FontSizes.caption,
@@ -285,9 +285,9 @@ const cardStyles = {
   actionButton: {
     flexDirection: 'row' as const,
     alignItems: 'center' as const,
-    gap: 4,
-    paddingVertical: 2,
-    paddingHorizontal: 4,
+    gap: Spacing.xs,
+    paddingVertical: Spacing.xs,
+    paddingHorizontal: Spacing.xs,
   },
   editButtonText: {
     fontSize: FontSizes.bodySm,

@@ -155,6 +155,6 @@ const styles = {
   subtitle: {
     fontSize: FontSizes.bodySm,
     color: Colors.textSecondary,
-    marginTop: 2,
+    marginTop: Spacing.xs,
   },
 };

@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.h2,
     fontWeight: '700',
     color: Colors.text,
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   email: {
     fontSize: FontSizes.body,

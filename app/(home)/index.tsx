@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
     color: Colors.textSecondary,
     textTransform: "uppercase",
     letterSpacing: 1,
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   balanceAmount: {
     fontSize: 40,
@@ -568,7 +568,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.xs,
-    marginBottom: 4,
+    marginBottom: Spacing.xs,
   },
   miniCardLabel: {
     fontSize: FontSizes.caption,
@@ -609,10 +609,10 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   insightCard: {
-    paddingVertical: 10,
+    paddingVertical: Spacing.sm,
     paddingHorizontal: Spacing.md,
     backgroundColor: Colors.backgroundElevated,
-    gap: 4,
+    gap: Spacing.xs,
   },
   insightRow: {
     flexDirection: "row",
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: 8,
+    paddingVertical: Spacing.sm,
   },
   recentInfo: {
     flex: 1,
@@ -659,7 +659,7 @@ const styles = StyleSheet.create({
     fontSize: FontSizes.bodySm,
     color: Colors.text,
     fontWeight: "500",
-    marginBottom: 2,
+    marginBottom: Spacing.xs,
   },
   recentDate: {
     fontSize: FontSizes.caption,
