@@ -13,7 +13,7 @@
     "lint": "expo lint",
     "build:apk:dev": "eas build --platform android --profile development",
     "build:apk:preview": "eas build --platform android --profile preview",
-    "build:apk:prod": "eas build --platform android --profile production"
+    "build:apk:prod": "EAS_BUILD_NO_EXPO_GO_WARNING=true eas build --platform android --profile production"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
