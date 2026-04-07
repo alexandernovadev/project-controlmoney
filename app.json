@@ -2,7 +2,7 @@
   "expo": {
     "name": "controlmoneyapp",
     "slug": "controlmoneyapp",
-    "version": "2.1.1",
+    "version": "2.7.7",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "controlmoneyapp",
